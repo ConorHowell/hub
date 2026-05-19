@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Project Hub — Navigation Console</title>
+  <title>Project Hub</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -189,19 +189,20 @@
 
     .header-center { flex: 1; }
 
-    .eyebrow {
-      font-family: 'Courier New', monospace;
-      font-size: .6rem; letter-spacing: .24em; text-transform: uppercase;
-      color: var(--muted); margin-bottom: .5rem;
+    @keyframes shimmer {
+      0%, 100% { background-position: 0% 50%; }
+      50%       { background-position: 100% 50%; }
     }
 
     .hub-title {
       font-size: 2.2rem; font-weight: 800; letter-spacing: .18em; text-transform: uppercase;
       background: linear-gradient(135deg, #8ab8d8 0%, #e0ecf8 45%, #a0b8cc 55%, #8ab8d8 100%);
+      background-size: 200% 200%;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
       filter: drop-shadow(0 0 28px rgba(240,168,48,0.28));
+      animation: shimmer 6s ease-in-out infinite;
     }
 
     .hub-coords {
@@ -345,15 +346,6 @@
       font-size: .7rem; color: var(--muted); line-height: 1.45; margin-top: .2rem;
     }
 
-    /* Approach vector footer */
-    .panel-vector {
-      font-family: 'Courier New', monospace;
-      font-size: .58rem; letter-spacing: .15em; text-transform: uppercase;
-      color: rgba(var(--accent-rgb), 0.45);
-      margin-top: auto; padding-top: .6rem;
-      border-top: 1px solid rgba(var(--accent-rgb), 0.1);
-    }
-
     /* Console footer */
     .console-footer {
       text-align: center;
@@ -366,6 +358,7 @@
     @media (prefers-reduced-motion: reduce) {
       body::before, body::after { display: none; }
       .reticle, .reticle-inner { animation: none; }
+      .hub-title { animation: none; }
       .project-panel { animation: none; }
       .project-panel:hover { transform: none; }
       .tool-link:hover { transform: none; }
@@ -380,9 +373,8 @@
       <div class="header-top">
         <div class="reticle"><div class="reticle-inner"></div></div>
         <div class="header-center">
-          <div class="eyebrow">NAVIGATION CONSOLE · SECTOR 7G</div>
           <h1 class="hub-title">PROJECT HUB</h1>
-          <div class="hub-coords">13°44′ N · CONOR HOWELL · ALL SYSTEMS NOMINAL</div>
+          <div class="hub-coords">CONOR HOWELL</div>
         </div>
         <div class="reticle reticle-right"><div class="reticle-inner"></div></div>
       </div>
@@ -417,7 +409,6 @@
             </div>
           </a>
         </div>
-        <div class="panel-vector">APPROACH VECTOR 047°</div>
       </div>
 
       <div class="project-panel" style="--accent:#a060f0;--accent-rgb:160,96,240">
@@ -439,7 +430,6 @@
             </div>
           </a>
         </div>
-        <div class="panel-vector">APPROACH VECTOR 182°</div>
       </div>
 
       <div class="project-panel" style="--accent:#70c890;--accent-rgb:112,200,144">
@@ -461,12 +451,11 @@
             </div>
           </a>
         </div>
-        <div class="panel-vector">APPROACH VECTOR 315°</div>
       </div>
 
     </main>
 
-    <footer class="console-footer">CONOR HOWELL · PERSONAL TOOLS · ALL SYSTEMS NOMINAL</footer>
+    <footer class="console-footer">CONOR HOWELL · PERSONAL TOOLS</footer>
   </div>
 </body>
 </html>
