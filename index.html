@@ -8,18 +8,23 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:       #07070f;
-      --surface:  #0e0e1c;
-      --surface2: #13132a;
-      --border:   #1c1c38;
-      --text:     #c8c8e8;
-      --muted:    #52527a;
-      --dim:      #2a2a50;
-      --accent:   #00e5ff;
+      --bg:       #000008;
+      --surface:  #06060f;
+      --surface2: #0a0a18;
+      --border:   rgba(160,190,220,0.12);
+      --text:     #ccd8e4;
+      --muted:    #4a5870;
+      --dim:      #1a2030;
+      --accent:   #7eb8e8;
+      --silver:   #a8c0d8;
     }
 
     body {
-      background: var(--bg);
+      background:
+        radial-gradient(ellipse 80% 50% at 15% 75%, rgba(45,10,78,.07) 0%, transparent 65%),
+        radial-gradient(ellipse 60% 60% at 85% 15%, rgba(10,26,62,.08) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 40% at 55% 45%, rgba(4,18,40,.05) 0%, transparent 60%),
+        var(--bg);
       color: var(--text);
       font-family: 'Segoe UI', system-ui, sans-serif;
       font-size: 14px;
@@ -32,23 +37,94 @@
       padding: 2rem 1rem;
     }
 
+    /* Star field */
     body::before {
       content: '';
-      position: fixed; inset: 0; pointer-events: none; z-index: 0;
-      background:
-        radial-gradient(ellipse 80% 60% at 10% 90%, rgba(255,0,180,.045) 0%, transparent 70%),
-        radial-gradient(ellipse 60% 50% at 90% 10%, rgba(0,229,255,.04) 0%, transparent 70%),
-        radial-gradient(ellipse 50% 40% at 50% 50%, rgba(120,80,255,.03) 0%, transparent 60%);
+      position: fixed;
+      top: 0; left: 0;
+      width: 1px; height: 1px;
+      background: transparent;
+      pointer-events: none; z-index: 0;
+      box-shadow:
+        45px 23px 0 0 rgba(210,225,255,.35),
+        123px 67px 0 0 rgba(210,225,255,.28),
+        201px 145px 0 0 rgba(210,225,255,.3),
+        312px 89px 0 0 rgba(210,225,255,.25),
+        456px 34px 0 0 rgba(210,225,255,.32),
+        534px 178px 0 0 rgba(210,225,255,.27),
+        678px 56px 0 0 rgba(210,225,255,.3),
+        789px 134px 0 0 rgba(210,225,255,.25),
+        901px 78px 0 0 rgba(210,225,255,.28),
+        1023px 201px 0 0 rgba(210,225,255,.3),
+        1145px 45px 0 0 rgba(210,225,255,.25),
+        1267px 167px 0 0 rgba(210,225,255,.32),
+        1389px 89px 0 0 rgba(210,225,255,.27),
+        1512px 234px 0 0 rgba(210,225,255,.3),
+        1634px 56px 0 0 rgba(210,225,255,.25),
+        1756px 145px 0 0 rgba(210,225,255,.28),
+        1878px 67px 0 0 rgba(210,225,255,.3),
+        89px 312px 0 0 rgba(210,225,255,.22),
+        234px 278px 0 0 rgba(210,225,255,.25),
+        378px 345px 0 0 rgba(210,225,255,.2),
+        512px 289px 0 0 rgba(210,225,255,.22),
+        667px 367px 0 0 rgba(210,225,255,.18),
+        801px 301px 0 0 rgba(210,225,255,.2),
+        945px 378px 0 0 rgba(210,225,255,.22),
+        1089px 323px 0 0 rgba(210,225,255,.2),
+        1234px 289px 0 0 rgba(210,225,255,.18),
+        1378px 356px 0 0 rgba(210,225,255,.22),
+        1523px 312px 0 0 rgba(210,225,255,.2),
+        1667px 378px 0 0 rgba(210,225,255,.18),
+        167px 156px 1px 0 rgba(230,240,255,.5),
+        389px 112px 1px 0 rgba(230,240,255,.48),
+        612px 189px 1px 0 rgba(230,240,255,.5),
+        834px 67px 1px 0 rgba(230,240,255,.45),
+        1056px 134px 1px 0 rgba(230,240,255,.5),
+        1278px 78px 1px 0 rgba(230,240,255,.48),
+        1501px 189px 1px 0 rgba(230,240,255,.45),
+        1723px 112px 1px 0 rgba(230,240,255,.5),
+        278px 234px 1px 0 rgba(230,240,255,.42),
+        723px 267px 1px 0 rgba(230,240,255,.45),
+        1167px 245px 1px 0 rgba(230,240,255,.42),
+        1612px 256px 1px 0 rgba(230,240,255,.4),
+        256px 89px 1px 1px rgba(200,230,255,.7),
+        734px 145px 1px 1px rgba(200,230,255,.65),
+        1189px 56px 2px 0 rgba(200,230,255,.7),
+        1623px 167px 1px 1px rgba(200,230,255,.6),
+        489px 201px 2px 0 rgba(220,240,255,.6),
+        978px 178px 1px 1px rgba(200,230,255,.65),
+        1445px 89px 2px 1px rgba(200,230,255,.6),
+        145px 45px 1px 0 rgba(150,200,255,.6),
+        567px 123px 1px 0 rgba(150,200,255,.55),
+        890px 34px 1px 0 rgba(150,200,255,.6),
+        1234px 145px 1px 0 rgba(150,200,255,.55),
+        1678px 67px 1px 0 rgba(150,200,255,.6),
+        67px 456px 0 0 rgba(210,225,255,.15),
+        345px 423px 0 0 rgba(210,225,255,.12),
+        623px 489px 0 0 rgba(210,225,255,.15),
+        901px 412px 0 0 rgba(210,225,255,.12),
+        1145px 467px 0 0 rgba(210,225,255,.1),
+        1423px 434px 0 0 rgba(210,225,255,.12),
+        1701px 456px 0 0 rgba(210,225,255,.1);
     }
+
+    /* Earth arc at horizon */
     body::after {
       content: '';
-      position: fixed; inset: 0;
-      background-image:
-        linear-gradient(rgba(0,229,255,.018) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,229,255,.018) 1px, transparent 1px);
-      background-size: 48px 48px;
+      position: fixed;
+      bottom: -55%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 240%;
+      height: 100%;
+      border-radius: 50%;
+      background: radial-gradient(ellipse at center top,
+        rgba(15,60,120,.09) 0%,
+        rgba(8,80,55,.06) 35%,
+        transparent 65%);
       pointer-events: none; z-index: 0;
     }
+
     @media (prefers-reduced-motion: reduce) { body::before, body::after { display: none; } }
 
     .wrapper {
@@ -63,15 +139,18 @@
       color: var(--muted); margin-bottom: .5rem;
     }
     .hub-title {
-      font-size: 1.7rem; font-weight: 800; letter-spacing: .08em;
-      color: var(--accent);
-      text-shadow: 0 0 28px rgba(0,229,255,.35);
+      font-size: 1.7rem; font-weight: 800; letter-spacing: .12em;
+      background: linear-gradient(135deg, #8eb4d4 0%, #d8ecf8 45%, #a0c4dc 55%, #8eb4d4 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 22px rgba(100,160,220,.45));
     }
     .hub-divider {
       height: 1px; margin: 1rem auto 0;
       width: 60%;
-      background: linear-gradient(90deg, transparent, var(--accent), transparent);
-      opacity: .35;
+      background: linear-gradient(90deg, transparent, var(--silver), transparent);
+      opacity: .25;
     }
 
     .project-group { display: flex; flex-direction: column; gap: .75rem; }
@@ -88,17 +167,18 @@
     .tool-grid { display: flex; flex-direction: column; gap: 1rem; }
 
     .tool-card {
-      background: var(--surface);
+      background: rgba(6,10,22,0.65);
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: 10px;
       padding: 1.25rem 1.5rem;
       display: flex; justify-content: space-between; align-items: center; gap: 1rem;
       text-decoration: none;
-      transition: border-color .2s, box-shadow .2s;
+      backdrop-filter: blur(4px);
+      transition: border-color .3s, box-shadow .3s;
     }
     .tool-card:hover {
-      border-color: var(--accent);
-      box-shadow: 0 0 20px rgba(0,229,255,.1);
+      border-color: rgba(140,180,210,.45);
+      box-shadow: 0 0 24px rgba(100,160,220,.12), 0 4px 20px rgba(0,0,10,.4);
     }
 
     .tool-info { flex: 1; }
@@ -111,7 +191,7 @@
     }
 
     .tool-arrow {
-      font-size: 1.1rem; color: var(--accent); opacity: .7;
+      font-size: 1.1rem; color: var(--silver); opacity: .55;
       flex-shrink: 0; transition: opacity .2s, transform .2s;
     }
     .tool-card:hover .tool-arrow { opacity: 1; transform: translateX(3px); }
@@ -119,7 +199,7 @@
     .hub-footer {
       text-align: center;
       font-size: .62rem; letter-spacing: .1em; text-transform: uppercase;
-      color: var(--muted); opacity: .5;
+      color: var(--muted); opacity: .4;
     }
   </style>
 </head>
