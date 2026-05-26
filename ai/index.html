@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>AI HUB</title>
+  <style>
+    :root {
+      --bg: #04040d;
+      --surface: #080814;
+      --surface2: #0d0d1f;
+      --border: rgba(160,170,220,0.1);
+      --text: #c0cce8;
+      --muted: #4a5472;
+      --amber: #f0a830;
+      --silver: #a8b8d0;
+      --ai: #00d4ff;
+      --ai-rgb: 0,212,255;
+      --green: #00ff88;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Courier New', Courier, monospace;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(0,212,255,0.04) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .page-wrap {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 44px 20px 80px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── Header ── */
+    .console-header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 10px;
+    }
+
+    .hub-title {
+      font-size: 1.9rem;
+      font-weight: 700;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, rgba(0,212,255,0.6), #00d4ff, rgba(0,212,255,0.6));
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 6s ease-in-out infinite;
+    }
+
+    .hub-sub {
+      font-size: 0.68rem;
+      color: var(--muted);
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      margin-top: 8px;
+    }
+
+    .hub-coords {
+      font-size: 0.58rem;
+      color: rgba(0,212,255,0.25);
+      letter-spacing: 0.15em;
+      margin-top: 5px;
+    }
+
+    .reticle {
+      width: 30px;
+      height: 30px;
+      border: 1.5px solid var(--ai);
+      border-radius: 50%;
+      position: relative;
+      animation: spin 8s linear infinite;
+      opacity: 0.55;
+      flex-shrink: 0;
+    }
+
+    .reticle::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      width: 5px;
+      height: 5px;
+      background: var(--ai);
+      border-radius: 50%;
+    }
+
+    .reticle::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      width: 16px;
+      height: 16px;
+      border: 1px solid rgba(0,212,255,0.25);
+      border-radius: 50%;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes shimmer { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+
+    /* ── Section labels ── */
+    section { margin-bottom: 52px; }
+
+    .section-label {
+      font-size: 0.58rem;
+      letter-spacing: 0.32em;
+      color: rgba(0,212,255,0.45);
+      text-transform: uppercase;
+      border-bottom: 1px solid rgba(0,212,255,0.1);
+      padding-bottom: 9px;
+      margin-bottom: 24px;
+    }
+
+    .section-label::before { content: '// '; color: rgba(0,212,255,0.25); }
+
+    /* ── Corners ── */
+    .corner {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      opacity: 0.28;
+      transition: opacity 0.25s;
+    }
+    .corner.tl { top: 9px; left: 9px; border-top: 1px solid var(--ai); border-left: 1px solid var(--ai); }
+    .corner.tr { top: 9px; right: 9px; border-top: 1px solid var(--ai); border-right: 1px solid var(--ai); }
+    .corner.bl { bottom: 9px; left: 9px; border-bottom: 1px solid var(--ai); border-left: 1px solid var(--ai); }
+    .corner.br { bottom: 9px; right: 9px; border-bottom: 1px solid var(--ai); border-right: 1px solid var(--ai); }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 24px;
+      position: relative;
+      transition: transform 0.22s, box-shadow 0.22s, border-color 0.22s;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 32px rgba(0,212,255,0.07);
+      border-color: rgba(0,212,255,0.22);
+    }
+
+    .card:hover .corner { opacity: 0.85; }
+
+    .card-badge {
+      width: 28px;
+      height: 28px;
+      background: rgba(0,212,255,0.1);
+      color: var(--ai);
+      font-size: 0.52rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+
+    .card-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ai);
+      margin-bottom: 6px;
+    }
+
+    .card-sub {
+      font-size: 0.69rem;
+      color: var(--muted);
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
+
+    /* ── Grids ── */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 13px;
+    }
+
+    .templates-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 13px;
+    }
+
+    @media (max-width: 700px) {
+      .grid-2, .templates-grid { grid-template-columns: 1fr; }
+      .skills-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 440px) {
+      .skills-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── Skill cards ── */
+    .skill-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 18px 15px;
+      position: relative;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+
+    .skill-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 22px rgba(0,212,255,0.07);
+      border-color: rgba(0,212,255,0.2);
+    }
+
+    .skill-card:hover .corner { opacity: 0.8; }
+
+    .skill-card.placeholder {
+      border-style: dashed;
+      opacity: 0.38;
+    }
+
+    .skill-card.placeholder:hover { transform: none; box-shadow: none; border-color: var(--border); }
+
+    .skill-name {
+      font-size: 0.73rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ai);
+      margin-bottom: 7px;
+    }
+
+    .skill-desc {
+      font-size: 0.66rem;
+      color: var(--muted);
+      line-height: 1.55;
+      margin-bottom: 11px;
+    }
+
+    .skill-trigger {
+      display: inline-block;
+      font-size: 0.68rem;
+      color: var(--ai);
+      background: rgba(0,212,255,0.07);
+      border: 1px solid rgba(0,212,255,0.14);
+      padding: 3px 7px;
+      margin-bottom: 11px;
+      letter-spacing: 0.01em;
+    }
+
+    /* ── Template cards ── */
+    .template-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 20px 17px;
+      position: relative;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+
+    .template-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 22px rgba(0,212,255,0.07);
+      border-color: rgba(0,212,255,0.2);
+    }
+
+    .template-card:hover .corner { opacity: 0.8; }
+
+    .template-card.coming-soon {
+      border-style: dashed;
+      opacity: 0.42;
+      pointer-events: none;
+    }
+
+    .template-name {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ai);
+      margin-bottom: 6px;
+    }
+
+    .template-stack {
+      font-size: 0.64rem;
+      color: var(--muted);
+      margin-bottom: 14px;
+      line-height: 1.55;
+    }
+
+    .soon-badge {
+      display: inline-block;
+      font-size: 0.53rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid rgba(74,84,114,0.45);
+      padding: 2px 7px;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.67rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 6px 13px;
+      border: 1px solid;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.18s, box-shadow 0.18s, color 0.18s, border-color 0.18s;
+      white-space: nowrap;
+      background: transparent;
+    }
+
+    .btn-primary {
+      border-color: var(--ai);
+      color: var(--ai);
+    }
+
+    .btn-primary:hover {
+      background: rgba(0,212,255,0.1);
+      box-shadow: 0 0 14px rgba(0,212,255,0.1);
+    }
+
+    .btn-ghost {
+      border-color: rgba(0,212,255,0.28);
+      color: rgba(0,212,255,0.65);
+    }
+
+    .btn-ghost:hover {
+      background: rgba(0,212,255,0.07);
+      border-color: var(--ai);
+      color: var(--ai);
+    }
+
+    .btn.copied {
+      border-color: rgba(0,255,136,0.45) !important;
+      color: var(--green) !important;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    /* ── Command block ── */
+    .cmd-block {
+      background: #020209;
+      border: 1px solid rgba(0,212,255,0.09);
+      padding: 9px 13px;
+      font-size: 0.72rem;
+      color: rgba(0,212,255,0.75);
+      margin: 12px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cmd-block::before {
+      content: '$';
+      color: rgba(0,212,255,0.3);
+      flex-shrink: 0;
+    }
+
+    /* ── Files list ── */
+    .files-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .files-list li {
+      display: flex;
+      align-items: center;
+      padding: 10px 14px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      gap: 12px;
+      font-size: 0.7rem;
+    }
+
+    .file-name {
+      color: var(--text);
+      font-family: monospace;
+      flex-shrink: 0;
+    }
+
+    .file-desc {
+      color: var(--muted);
+      font-size: 0.63rem;
+      flex: 1;
+    }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 22px 0;
+      font-size: 0.58rem;
+      color: rgba(74,84,114,0.5);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      border-top: 1px solid var(--border);
+      margin-top: 48px;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrap">
+
+    <header class="console-header">
+      <div class="header-top">
+        <div class="reticle"></div>
+        <h1 class="hub-title">AI&nbsp;HUB</h1>
+        <div class="reticle" style="animation-direction:reverse"></div>
+      </div>
+      <div class="hub-sub">Claude Code &nbsp;·&nbsp; Skills &nbsp;·&nbsp; Bot Templates</div>
+      <div class="hub-coords">PROTOCOL: INTERNAL &nbsp;//&nbsp; ACCESS: RESTRICTED</div>
+    </header>
+
+    <!-- UNIVERSAL CONTEXT -->
+    <section>
+      <div class="section-label">Universal Context</div>
+      <div class="grid-2">
+
+        <div class="card">
+          <div class="corner tl"></div><div class="corner tr"></div>
+          <div class="corner bl"></div><div class="corner br"></div>
+          <div class="card-badge">ON</div>
+          <div class="card-title">Onboarding Guide</div>
+          <div class="card-sub">Full project context for any Claude Code session. Load via URL or paste text manually into any AI.</div>
+          <div class="btn-row">
+            <a href="https://claude.ai/claude-code/onboard/K-BGkmyf4dVq" target="_blank" rel="noopener" class="btn btn-primary">⊞ Load in Claude Code</a>
+            <a href="files/ONBOARDING.md" download class="btn btn-ghost">↓ Download .md</a>
+            <button class="btn btn-ghost" id="btn-onboard" onclick="copyOnboarding(this)">⎘ Copy text</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="corner tl"></div><div class="corner tr"></div>
+          <div class="corner bl"></div><div class="corner br"></div>
+          <div class="card-badge">SH</div>
+          <div class="card-title">New Machine Setup</div>
+          <div class="card-sub">Installs <code style="color:var(--ai);font-size:0.68rem">~/.claude</code> config and skill junctions on a fresh Windows machine. Requires Git Bash.</div>
+          <div class="cmd-block">bash setup.sh</div>
+          <div class="btn-row">
+            <a href="files/setup.sh" download class="btn btn-primary">↓ Download setup.sh</a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SKILLS LIBRARY -->
+    <section>
+      <div class="section-label">Skills Library</div>
+      <div class="skills-grid">
+
+        <div class="skill-card">
+          <div class="corner tl"></div><div class="corner br"></div>
+          <div class="skill-name">Caveman</div>
+          <div class="skill-desc">~75% token reduction. Drops filler, keeps all technical substance. 6 intensity levels.</div>
+          <div class="skill-trigger">/caveman</div>
+          <div class="btn-row">
+            <button class="btn btn-ghost" onclick="copyTrigger('/caveman',this)">⎘ Copy</button>
+          </div>
+        </div>
+
+        <div class="skill-card">
+          <div class="corner tl"></div><div class="corner br"></div>
+          <div class="skill-name">Cavecrew</div>
+          <div class="skill-desc">Compressed subagent delegation. ~60% smaller tool results — extends context budget across long sessions.</div>
+          <div class="skill-trigger">/cavecrew</div>
+          <div class="btn-row">
+            <button class="btn btn-ghost" onclick="copyTrigger('/cavecrew',this)">⎘ Copy</button>
+          </div>
+        </div>
+
+        <div class="skill-card">
+          <div class="corner tl"></div><div class="corner br"></div>
+          <div class="skill-name">Ship-Review</div>
+          <div class="skill-desc">Pre-ship diff gate. Checks HTML, credentials, JS errors. Auto-runs in publish.sh pipeline.</div>
+          <div class="skill-trigger">/ship-review</div>
+          <div class="btn-row">
+            <button class="btn btn-ghost" onclick="copyTrigger('/ship-review',this)">⎘ Copy</button>
+          </div>
+        </div>
+
+        <div class="skill-card">
+          <div class="corner tl"></div><div class="corner br"></div>
+          <div class="skill-name">Caveman-Commit</div>
+          <div class="skill-desc">Conventional Commits ≤50 chars. Why not what. Body only when reason is non-obvious.</div>
+          <div class="skill-trigger">/caveman-commit</div>
+          <div class="btn-row">
+            <button class="btn btn-ghost" onclick="copyTrigger('/caveman-commit',this)">⎘ Copy</button>
+          </div>
+        </div>
+
+        <div class="skill-card">
+          <div class="corner tl"></div><div class="corner br"></div>
+          <div class="skill-name">Caveman-Review</div>
+          <div class="skill-desc">One-line PR comments. <code style="font-size:0.6rem;color:var(--ai)">path:line: 🔴 bug: problem. fix.</code> No throat-clearing.</div>
+          <div class="skill-trigger">/caveman-review</div>
+          <div class="btn-row">
+            <button class="btn btn-ghost" onclick="copyTrigger('/caveman-review',this)">⎘ Copy</button>
+          </div>
+        </div>
+
+        <div class="skill-card">
+          <div class="corner tl"></div><div class="corner br"></div>
+          <div class="skill-name">Caveman-Compress</div>
+          <div class="skill-desc">Compress .md files in-place. ~46% token savings. Backs up original. Python 3.10+ required.</div>
+          <div class="skill-trigger">/caveman-compress FILE</div>
+          <div class="btn-row">
+            <button class="btn btn-ghost" onclick="copyTrigger('/caveman-compress',this)">⎘ Copy</button>
+          </div>
+        </div>
+
+        <div class="skill-card">
+          <div class="corner tl"></div><div class="corner br"></div>
+          <div class="skill-name">Caveman-Stats</div>
+          <div class="skill-desc">Real token usage from session log. No estimation — reads directly from Claude Code data.</div>
+          <div class="skill-trigger">/caveman-stats</div>
+          <div class="btn-row">
+            <button class="btn btn-ghost" onclick="copyTrigger('/caveman-stats',this)">⎘ Copy</button>
+          </div>
+        </div>
+
+        <div class="skill-card">
+          <div class="corner tl"></div><div class="corner br"></div>
+          <div class="skill-name">Caveman-Help</div>
+          <div class="skill-desc">Quick-reference card. All modes, all skills, all deactivation triggers. One-shot display.</div>
+          <div class="skill-trigger">/caveman-help</div>
+          <div class="btn-row">
+            <button class="btn btn-ghost" onclick="copyTrigger('/caveman-help',this)">⎘ Copy</button>
+          </div>
+        </div>
+
+        <div class="skill-card placeholder">
+          <div class="skill-name">+ Add Skill</div>
+          <div class="skill-desc">New skills added to .agents/skills/ appear here after deploy.</div>
+          <div class="skill-trigger">—</div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- BOT TEMPLATES -->
+    <section>
+      <div class="section-label">Bot Templates</div>
+      <div class="templates-grid">
+
+        <div class="template-card">
+          <div class="corner tl"></div><div class="corner br"></div>
+          <div class="template-name">WordPress Dev</div>
+          <div class="template-stack">_tw (Underscores + Tailwind CSS) · Local by Flywheel · WP Engine · Pure PHP templates · Junior coder role</div>
+          <div class="btn-row">
+            <a href="files/CLAUDE.wordpress-tw.md" download class="btn btn-primary">↓ Download CLAUDE.md</a>
+          </div>
+        </div>
+
+        <div class="template-card coming-soon">
+          <div class="template-name">Game Modding</div>
+          <div class="template-stack">E: drive · Game-specific file structures · Mod conventions · Config patching</div>
+          <div class="soon-badge">Coming soon</div>
+        </div>
+
+        <div class="template-card coming-soon">
+          <div class="template-name">General Coding</div>
+          <div class="template-stack">Language-agnostic · Any stack · D: drive · Standard engineering conventions</div>
+          <div class="soon-badge">Coming soon</div>
+        </div>
+
+        <div class="template-card coming-soon">
+          <div class="template-name">Data / Scripts</div>
+          <div class="template-stack">Python · SQL · Bash · Data pipelines · Automation · Local runner tasks</div>
+          <div class="soon-badge">Coming soon</div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- RAW FILES -->
+    <section>
+      <div class="section-label">Raw Files</div>
+      <ul class="files-list">
+        <li>
+          <span class="file-name">ONBOARDING.md</span>
+          <span class="file-desc">Universal project context — load via Claude Code URL or paste into any AI</span>
+          <a href="files/ONBOARDING.md" download class="btn btn-ghost">↓</a>
+        </li>
+        <li>
+          <span class="file-name">setup.sh</span>
+          <span class="file-desc">New machine installer — writes ~/.claude config + skill junctions (Git Bash)</span>
+          <a href="files/setup.sh" download class="btn btn-ghost">↓</a>
+        </li>
+        <li>
+          <span class="file-name">CLAUDE.wordpress-tw.md</span>
+          <span class="file-desc">WordPress bot template — rename to CLAUDE.md at project root, find/replace [THEME_NAME]</span>
+          <a href="files/CLAUDE.wordpress-tw.md" download class="btn btn-ghost">↓</a>
+        </li>
+      </ul>
+    </section>
+
+    <footer>Internal use only &nbsp;·&nbsp; Not indexed &nbsp;·&nbsp; Co-Work_Main AI Hub</footer>
+
+  </div>
+
+  <script>
+    const ONBOARDING_TEXT = `# Co-Work_Main Onboarding
+
+## Projects & Deploy
+| Dir | Repo | Slug | Auth |
+|-----|------|------|------|
+| Hub/ | ConorHowell/hub | /hub/ | none |
+| Neon Odyssey/ | ConorHowell/gm-tools | /neon/ | HTTP Basic: neon |
+| Champions Helper/ | ConorHowell/champions-helper | /champ/ | HTTP Basic: champ |
+| Morrowind Quest Helper/ | ConorHowell/morrowind-quest-helper | /morrowind/ | none |
+
+Server: AWS Lightsail \`52.13.231.223\`, SSH user \`bitnami\`, key \`~/.ssh/LightsailDefaultKey-us-west-2.pem\`
+
+**NEVER commit/push/deploy manually. Always:** \`./publish.sh <slug> "message"\`
+
+## Rules
+- Session start: invoke \`/caveman\` before first response.
+- ALL file searches/greps/dir listings -> Explore subagent.
+- ALL edits (even 1 line) -> general-purpose subagent via worktree.
+- Read single known-path file inline ONLY for immediate value in current turn.
+- Credentials: \`_PRIVATE/server-access.md\` — never hardcode.
+- New apps: follow Adding a New Project pattern in CLAUDE.md.
+- Session end: update Next Steps in CLAUDE.md + run \`git worktree prune\`.
+
+## Skills
+| Skill | What it does |
+|-------|-------------|
+| /caveman | Terse mode — drops articles/filler, ~75% fewer output tokens |
+| /cavecrew | Decision guide for spawning compressed subagents |
+| /caveman-review | One-line PR comments: path:line bug: problem. fix. |
+| /caveman-commit | Conventional Commits <=50 chars, body only when why is non-obvious |
+| /caveman-compress FILE | Compress a .md file in-place, saves ~46% tokens |
+| /caveman-stats | Real token usage from session log |
+| /caveman-help | Quick-reference card |
+| /ship-review | Pre-ship diff review — used by publish.sh automatically |
+
+## Active Project Notes
+- Morrowind Quest Helper: deployed, flagged for future bot-autonomous quest data updates.
+- Neon Odyssey deploy.sh: uses rsync with explicit file list — update it when new files added.
+- ship-review: skill drives publish.sh review prompt — edit .agents/skills/ship-review/SKILL.md to change criteria.
+
+## Drive Layout
+- C: system only. Claude config here (C:\\Users\\<user>\\.claude\\) but nothing else.
+- D: all repos and projects (this repo lives at D:\\Co-Work_Main\\).
+- E: games and modding work.
+
+## First Session Checklist
+1. Read project CLAUDE.md.
+2. Run /caveman — reminded by SessionStart hook if you forget.
+3. Read the specific sub-project .claude/CLAUDE.md before touching its files.
+4. Never use git push / scp directly — use ./publish.sh.
+5. New files/projects -> D: drive. Game modding -> E: drive. Never C:.`;
+
+    function copyOnboarding(btn) {
+      navigator.clipboard.writeText(ONBOARDING_TEXT).then(() => {
+        const orig = btn.textContent;
+        btn.textContent = '✓ Copied';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 2000);
+      }).catch(() => {});
+    }
+
+    function copyTrigger(trigger, btn) {
+      navigator.clipboard.writeText(trigger).then(() => {
+        const orig = btn.textContent;
+        btn.textContent = '✓';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 1500);
+      }).catch(() => {});
+    }
+  </script>
+</body>
+</html>
