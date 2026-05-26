@@ -8,7 +8,7 @@
 | Champions Helper/ | ConorHowell/champions-helper | /champ/ | HTTP Basic: champ |
 | Morrowind Quest Helper/ | ConorHowell/morrowind-quest-helper | /morrowind/ | none |
 
-Server: AWS Lightsail `52.13.231.223`, SSH user `bitnami`, key `~/.ssh/LightsailDefaultKey-us-west-2.pem`
+Server: AWS Lightsail — details in `_PRIVATE/server-access.md`
 
 **NEVER commit/push/deploy manually. Always:** `./publish.sh <slug> "message"`
 
