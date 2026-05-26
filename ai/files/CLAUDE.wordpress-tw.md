@@ -1,45 +1,101 @@
-# WordPress Dev Bot Template
+# [THEME_NAME] — WordPress Theme
 
-> Source file `CLAUDE.wordpress-tw.md` not yet created at project root.
-> Create it at `/Users/home/Documents/Co-Work_Main/CLAUDE.wordpress-tw.md`, then re-deploy to update this file.
+## Stack
+- **Theme:** _tw (Underscores + Tailwind CSS) — `wp-content/themes/[THEME_NAME]/`
+- **Local dev:** Local by Flywheel
+- **Hosting:** WP Engine
+- **Deploy:** Manual push/pull via the Local app — **Claude never deploys**
 
-## Intended Stack
-- Underscores (_tw) starter theme + Tailwind CSS
-- Local by Flywheel for local dev
-- WP Engine for production
-- Pure PHP templates (no page builders)
-- Claude acts as junior coder — asks before architectural changes
+---
 
-## Usage
-1. Copy this file to your WordPress project root.
-2. Rename to `CLAUDE.md`.
-3. Find/replace `[THEME_NAME]` with your actual theme folder name.
-4. Fill in the project-specific sections below.
+## Project Structure
 
-## Overview
-- **What it does:** [describe site purpose]
-- **Tech stack:** WordPress · _tw (Underscores + Tailwind CSS) · PHP · Local by Flywheel
-- **Theme:** `wp-content/themes/[THEME_NAME]/`
-- **Dev command:** Open Local by Flywheel → start site
+```
+wp-content/themes/[THEME_NAME]/
+├── inc/                  # PHP includes (customizer, template-functions, template-tags)
+├── template-parts/       # Reusable PHP partials (content, header, footer pieces)
+├── src/                  # Source CSS/JS (do not edit compiled output)
+│   ├── css/
+│   └── js/
+├── functions.php         # Theme setup, enqueue, hooks
+├── style.css             # WP theme header (do not add real CSS here)
+├── tailwind.config.js    # Tailwind config — extend here, don't add arbitrary values
+├── package.json
+└── *.php                 # Template files (index, page, single, archive, etc.)
+```
 
-## Key Files
-| File | Purpose |
-|------|---------|
-| `wp-content/themes/[THEME_NAME]/functions.php` | Theme functions, enqueue scripts |
-| `wp-content/themes/[THEME_NAME]/tailwind.config.js` | Tailwind configuration |
-| `wp-content/themes/[THEME_NAME]/style.css` | Theme header + base styles |
+---
 
-## Constraints
-- Never edit files in `wp-content/plugins/` unless explicitly asked.
-- No page builder markup — pure PHP templates only.
-- Tailwind classes only in template files; no custom CSS unless Tailwind can't cover it.
-- Always test in Local before pushing to WP Engine.
-- Junior coder role: propose changes, wait for approval on anything structural.
+## Build
 
-## Deploy
-- Local → WP Engine via WP Engine Local plugin push, or manual SFTP.
-- Never push directly to production database.
+```bash
+# First time / after pulling
+npm install
 
-## Known Gotchas
-- Tailwind purge config must include all PHP template paths or classes will be stripped in production build.
-- `functions.php` fatal errors take down the whole site — test locally first.
+# Development (watch mode — run while coding)
+npm run dev
+
+# Production (before pushing to WP Engine)
+npm run build
+```
+
+**Always run `npm run build` before telling the user the work is ready to push.**
+Never edit files in `dist/` or any compiled output directly.
+
+---
+
+## Naming Conventions
+
+Replace `[THEME_NAME]` everywhere with the actual theme slug.
+
+| Thing | Pattern | Example |
+|-------|---------|---------|
+| Function prefix | `[THEME_NAME]_` | `my_theme_setup()` |
+| Text domain | `[THEME_NAME]` | `__( 'Label', '[THEME_NAME]' )` |
+| Hook prefix | `[THEME_NAME]/` | `do_action( '[THEME_NAME]/before_header' )` |
+| CSS classes | Tailwind utilities + `.[THEME_NAME]-*` for custom | `.my-theme-hero` |
+
+---
+
+## WordPress Rules
+
+- Use `get_template_part()` for all partials — never `include`/`require` template files directly.
+- Escape all output: `esc_html()`, `esc_attr()`, `esc_url()`, `wp_kses_post()`.
+- Never query the database directly (`$wpdb`) unless there is no WP function for it.
+- Use `wp_enqueue_scripts` to load CSS/JS — never hardcode `<script>` or `<link>` tags.
+- Internationalize all user-facing strings with `__()` / `_e()`.
+- Never edit `wp-config.php`, `wp-settings.php`, or core files.
+- `functions.php` grows fast — keep it organized. New feature areas go in `inc/`.
+
+---
+
+## Tailwind Rules
+
+- Extend the theme in `tailwind.config.js` → `theme.extend` — do not override defaults.
+- Avoid inline `style=""` — use Tailwind utilities or a custom class.
+- Custom component classes go in `src/css/` using `@layer components {}`.
+- Check `tailwind.config.js` content paths before adding new template directories.
+
+---
+
+## Deployment (Manual — Claude does not touch this)
+
+Push and pull happen through the **Local app UI**:
+- Local → WP Engine: "Push to WP Engine" button
+- WP Engine → Local: "Pull from WP Engine" button
+
+Before telling the user work is ready:
+1. `npm run build` ran successfully
+2. No PHP errors in Local's logs
+3. Visually confirmed the change in Local (localhost)
+
+---
+
+## Claude's Role — Junior Coder
+
+- Ask before changing template hierarchy, hook structure, or anything architectural.
+- Ask before adding a new `inc/` file or registering a new post type/taxonomy.
+- Implement what's asked. Do not refactor surrounding code unless asked.
+- If something looks wrong in existing code, flag it — don't silently fix it.
+- One task at a time. Confirm before moving to the next.
+- No npm package installs without asking first.
