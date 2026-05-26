@@ -448,6 +448,30 @@
       border-top: 1px solid var(--border);
       margin-top: 48px;
     }
+    .skill-suite {
+      grid-column: 1 / -1;
+    }
+    .suite-commands {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem 1.5rem;
+      margin-top: 0.75rem;
+    }
+    .suite-cmd {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .suite-cmd .skill-trigger {
+      flex-shrink: 0;
+      font-size: 0.65rem;
+      min-width: 11rem;
+    }
+    .suite-cmd-desc {
+      flex: 1;
+      font-size: 0.65rem;
+      color: var(--dim);
+    }
   </style>
 </head>
 <body>
@@ -501,13 +525,41 @@
       <div class="section-label">Skills Library</div>
       <div class="skills-grid">
 
-        <div class="skill-card">
+        <div class="skill-card skill-suite">
           <div class="corner tl"></div><div class="corner br"></div>
-          <div class="skill-name">Caveman</div>
-          <div class="skill-desc">~75% token reduction. Drops filler, keeps all technical substance. 6 intensity levels.</div>
-          <div class="skill-trigger">/caveman</div>
-          <div class="btn-row">
-            <button class="btn btn-ghost" onclick="copyTrigger('/caveman',this)">⎘ Copy</button>
+          <div class="skill-name">Caveman Suite</div>
+          <div class="skill-desc">Terse communication framework. Drops filler, keeps all technical substance. ~75% token reduction. Active every session by default.</div>
+          <div class="suite-commands">
+            <div class="suite-cmd">
+              <span class="skill-trigger">/caveman</span>
+              <span class="suite-cmd-desc">Main toggle — 6 intensity levels (lite → ultra)</span>
+              <button class="btn btn-ghost" onclick="copyTrigger('/caveman',this)">⎘</button>
+            </div>
+            <div class="suite-cmd">
+              <span class="skill-trigger">/caveman-commit</span>
+              <span class="suite-cmd-desc">Conventional Commits ≤50 chars, why not what</span>
+              <button class="btn btn-ghost" onclick="copyTrigger('/caveman-commit',this)">⎘</button>
+            </div>
+            <div class="suite-cmd">
+              <span class="skill-trigger">/caveman-review</span>
+              <span class="suite-cmd-desc">One-line PR comments: path:line: 🔴 bug: problem. fix.</span>
+              <button class="btn btn-ghost" onclick="copyTrigger('/caveman-review',this)">⎘</button>
+            </div>
+            <div class="suite-cmd">
+              <span class="skill-trigger">/caveman-compress FILE</span>
+              <span class="suite-cmd-desc">Compress .md files in-place, ~46% token savings</span>
+              <button class="btn btn-ghost" onclick="copyTrigger('/caveman-compress',this)">⎘</button>
+            </div>
+            <div class="suite-cmd">
+              <span class="skill-trigger">/caveman-stats</span>
+              <span class="suite-cmd-desc">Real token usage from session log</span>
+              <button class="btn btn-ghost" onclick="copyTrigger('/caveman-stats',this)">⎘</button>
+            </div>
+            <div class="suite-cmd">
+              <span class="skill-trigger">/caveman-help</span>
+              <span class="suite-cmd-desc">Quick-reference card — all modes and triggers</span>
+              <button class="btn btn-ghost" onclick="copyTrigger('/caveman-help',this)">⎘</button>
+            </div>
           </div>
         </div>
 
@@ -528,56 +580,6 @@
           <div class="skill-trigger">/ship-review</div>
           <div class="btn-row">
             <button class="btn btn-ghost" onclick="copyTrigger('/ship-review',this)">⎘ Copy</button>
-          </div>
-        </div>
-
-        <div class="skill-card">
-          <div class="corner tl"></div><div class="corner br"></div>
-          <div class="skill-name">Caveman-Commit</div>
-          <div class="skill-desc">Conventional Commits ≤50 chars. Why not what. Body only when reason is non-obvious.</div>
-          <div class="skill-trigger">/caveman-commit</div>
-          <div class="btn-row">
-            <button class="btn btn-ghost" onclick="copyTrigger('/caveman-commit',this)">⎘ Copy</button>
-          </div>
-        </div>
-
-        <div class="skill-card">
-          <div class="corner tl"></div><div class="corner br"></div>
-          <div class="skill-name">Caveman-Review</div>
-          <div class="skill-desc">One-line PR comments. <code style="font-size:0.6rem;color:var(--ai)">path:line: 🔴 bug: problem. fix.</code> No throat-clearing.</div>
-          <div class="skill-trigger">/caveman-review</div>
-          <div class="btn-row">
-            <button class="btn btn-ghost" onclick="copyTrigger('/caveman-review',this)">⎘ Copy</button>
-          </div>
-        </div>
-
-        <div class="skill-card">
-          <div class="corner tl"></div><div class="corner br"></div>
-          <div class="skill-name">Caveman-Compress</div>
-          <div class="skill-desc">Compress .md files in-place. ~46% token savings. Backs up original. Python 3.10+ required.</div>
-          <div class="skill-trigger">/caveman-compress FILE</div>
-          <div class="btn-row">
-            <button class="btn btn-ghost" onclick="copyTrigger('/caveman-compress',this)">⎘ Copy</button>
-          </div>
-        </div>
-
-        <div class="skill-card">
-          <div class="corner tl"></div><div class="corner br"></div>
-          <div class="skill-name">Caveman-Stats</div>
-          <div class="skill-desc">Real token usage from session log. No estimation — reads directly from Claude Code data.</div>
-          <div class="skill-trigger">/caveman-stats</div>
-          <div class="btn-row">
-            <button class="btn btn-ghost" onclick="copyTrigger('/caveman-stats',this)">⎘ Copy</button>
-          </div>
-        </div>
-
-        <div class="skill-card">
-          <div class="corner tl"></div><div class="corner br"></div>
-          <div class="skill-name">Caveman-Help</div>
-          <div class="skill-desc">Quick-reference card. All modes, all skills, all deactivation triggers. One-shot display.</div>
-          <div class="skill-trigger">/caveman-help</div>
-          <div class="btn-row">
-            <button class="btn btn-ghost" onclick="copyTrigger('/caveman-help',this)">⎘ Copy</button>
           </div>
         </div>
 
@@ -646,16 +648,6 @@
           <span class="file-name">setup.sh</span>
           <span class="file-desc">New machine installer — writes ~/.claude config + skill junctions (Git Bash)</span>
           <a href="files/setup.sh" download class="btn btn-ghost">↓</a>
-        </li>
-        <li>
-          <span class="file-name">CLAUDE.wordpress-tw.md</span>
-          <span class="file-desc">WordPress bot template — rename to CLAUDE.md at project root, find/replace [THEME_NAME]</span>
-          <a href="files/CLAUDE.wordpress-tw.md" download class="btn btn-ghost">↓</a>
-        </li>
-        <li>
-          <span class="file-name">CLAUDE.security-review.md</span>
-          <span class="file-desc">Security audit bot template</span>
-          <a href="files/CLAUDE.security-review.md" download class="btn btn-ghost">↓</a>
         </li>
       </ul>
     </section>
