@@ -18,13 +18,13 @@ CLI: see claude.ai/code
 
 **2. Set global rules** — `~/.claude/CLAUDE.md`
 Download a template from this hub. Drop it at `~/.claude/CLAUDE.md`.
-Global rules apply to every project. Put session-start behavior and safety rules here.
+Global rules apply to every project. Put session-start behavior, safety rules, and subagent delegation rules here (see Subagent / Worktree Safety Rules below).
 
 **3. Install Caveman first** (token savings from session 1)
 ```bash
 npx skills add <path-to-caveman-skill-dir> -a claude-code -y
 ```
-Skills install globally into `~/.claude/` — run once, active in all projects and sessions.
+Skills are local directories — you need the source files before installing. Clone a skills repo, or write your own. Skills install globally into `~/.claude/` — run once, active in all projects and sessions.
 
 **4. Install remaining skills**
 ```bash
@@ -121,6 +121,8 @@ npx skills add ./.agents/skills/<name> -a claude-code -y
 ---
 
 ## Subagent / Worktree Safety Rules
+
+Add these rules to `~/.claude/CLAUDE.md` so every bot, in every project, follows them automatically.
 
 When using agents that spawn git worktrees, follow these rules to prevent silent failures:
 
