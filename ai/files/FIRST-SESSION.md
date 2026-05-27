@@ -62,6 +62,11 @@ If `MISSING`: create `~/.claude/CLAUDE.md` with this content (adapt for Windows 
 
 ## Session Start
 - At the start of every session, activate caveman mode by invoking the /caveman skill before your first response.
+
+## Subagent Delegation
+- When spawning subagents that use git worktrees: use `git -C /absolute/path` — never `cd` inside bash calls; the directory persists across calls and causes silent git errors.
+- After a worktree agent completes: explicitly verify and merge the temp branch — never assume the merge happened automatically.
+- Before delegating: identify all git repos in scope — subdirectories can have their own `.git`.
 ```
 
 If `EXISTS`: read it and ask "Want to keep your existing global rules or replace them with a solid baseline?"
