@@ -679,17 +679,16 @@
           <div class="step-num">3</div>
           <div class="step-body">
             <div class="step-title">Install Caveman first — token savings from session 1</div>
-            <div class="step-desc">Skills install globally — run once from anywhere, active in all projects. See <a href="#skills">Caveman Suite</a> for the full command set.</div>
-            <div class="step-desc">Skills are local directories — you need the source files first. Clone a skills repo, or use the <a href="#setup">First Session Guide</a> which walks you through sourcing skills interactively.</div>
-            <div class="code-block shell">npx skills add &lt;path-to-caveman-skill-dir&gt; -a claude-code -y</div>
+            <div class="step-desc">Caveman is a plugin — add its marketplace entry to <code>~/.claude/settings.json</code> and it auto-installs on next launch. See <a href="#skills">Caveman Suite</a> for the full command set.</div>
           </div>
         </div>
         <div class="step">
           <div class="step-num">4</div>
           <div class="step-body">
-            <div class="step-title">Install remaining skills</div>
-            <div class="step-desc">See the full <a href="#skills">Skills section</a> for what's available. Or <a href="files/setup.sh" download>download setup.sh</a> to install all at once.</div>
-            <div class="code-block shell">npx skills add &lt;path-to-skill-dir&gt; -a claude-code -y</div>
+            <div class="step-title">Install hub skills</div>
+            <div class="step-desc">Download <a href="files/install-skills.sh" download>install-skills.sh</a> — a self-contained script with all hub skills embedded. Run it directly, or paste into Claude Code and say "run this." No repo clone needed.</div>
+            <div class="code-block shell">bash install-skills.sh</div>
+            <div class="step-desc">Or install individually — see the full <a href="#skills">Skills section</a> for what's available and manual install commands.</div>
           </div>
         </div>
         <div class="step">
@@ -785,7 +784,10 @@
         <div class="callout-label">Global Install</div>
         <p>Skills install into <code>~/.claude/</code> — run once from anywhere, active in all projects. The <code>-a claude-code</code> flag targets Claude Code. <code>-y</code> skips confirmation.</p>
         <div class="code-block shell">npx skills add &lt;path-to-skill-directory&gt; -a claude-code -y</div>
-        <p><strong>Where to get skill directories:</strong> skills are local folders — you need the source files first. Clone a skills repo, or write your own (see <a href="#write-skill">Write Your Own Skill</a>). The <a href="#setup">First Session Guide</a> walks you through sourcing and installing skills interactively. To install all skills at once, use <a href="files/setup.sh" download>setup.sh</a>.</p>
+        <p><strong>Where to get skill files:</strong> download <a href="files/install-skills.sh" download>install-skills.sh</a> — a self-contained script with all 4 generic hub skills embedded. Run it directly or paste into Claude Code and say "run this." No repo clone required.</p>
+        <div class="code-block shell">bash install-skills.sh                       # all 4 skills
+bash install-skills.sh cavecrew ship-review  # specific skills</div>
+        <p>Or write your own (see <a href="#write-skill">Write Your Own Skill</a>). The <a href="#setup">First Session Guide</a> also walks you through sourcing and installing skills interactively.</p>
         <p class="note">Common failure: the directory must contain a <code>SKILL.md</code> file with valid <code>name:</code> and <code>description:</code> frontmatter. Missing file or malformed frontmatter = silent failure.</p>
       </div>
 
@@ -1014,8 +1016,13 @@ VERDICT=$(echo "$REVIEW" | head -1 | tr '[:lower:]' '[:upper:]')
             <td><a href="files/ONBOARDING.md" download class="btn btn-outline btn-sm">↓</a></td>
           </tr>
           <tr>
+            <td>install-skills.sh</td>
+            <td>Self-contained skills installer — embeds all 4 generic hub skills, no repo clone required. Run directly or paste into Claude Code.</td>
+            <td><a href="files/install-skills.sh" download class="btn btn-outline btn-sm">↓</a></td>
+          </tr>
+          <tr>
             <td>setup.sh</td>
-            <td>New machine installer — writes ~/.claude config + skill junctions (Git Bash / macOS)</td>
+            <td>New machine installer — writes ~/.claude config + skill junctions (Git Bash / macOS, requires repo)</td>
             <td><a href="files/setup.sh" download class="btn btn-outline btn-sm">↓</a></td>
           </tr>
           <tr>
