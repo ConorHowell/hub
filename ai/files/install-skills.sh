@@ -4,11 +4,18 @@
 # Creates skill directories and registers them with Claude Code.
 #
 # Usage:
-#   bash install-skills.sh                              # install all 4 generic skills
+#   bash install-skills.sh                              # install caveman + all 4 skills
+#   bash install-skills.sh caveman                     # install only the caveman plugin
 #   bash install-skills.sh cavecrew ship-review         # install specific skills
 #
-# Available: cavecrew, ship-review, prompt-engineer, persona-builder
-# Requires: node/npm (for npx), Claude Code installed
+# Available:
+#   caveman        — plugin (patches ~/.claude/settings.json, auto-installs from GitHub)
+#   cavecrew       — subagent delegation guide
+#   ship-review    — pre-ship diff reviewer
+#   prompt-engineer — 5-phase prompt design
+#   persona-builder — expert team assembly
+#
+# Requires: python3 (for caveman), node/npm (for skills), Claude Code installed
 #
 # deploy-check and security-check are project-specific — they reference your server,
 # slugs, and file paths. Write them from scratch using the SKILL.md format in the hub.
@@ -17,6 +24,36 @@ set -euo pipefail
 
 DIR="${HOME}/.agents/skills"
 mkdir -p "$DIR"
+
+# ── Caveman plugin ────────────────────────────────────────────────────────────
+
+install_caveman() {
+  python3 - << 'PYEOF'
+import json, os
+
+settings_path = os.path.expanduser('~/.claude/settings.json')
+entry = {'source': {'source': 'github', 'repo': 'JuliusBrussee/caveman'}}
+
+config = {}
+if os.path.exists(settings_path):
+    with open(settings_path) as f:
+        config = json.load(f)
+
+has_market = 'caveman' in config.get('extraKnownMarketplaces', {})
+has_plugin = 'caveman@caveman' in config.get('enabledPlugins', {})
+
+if has_market and has_plugin:
+    print('  already installed — caveman found in ~/.claude/settings.json')
+    print('  (registered by setup.sh or a previous install-skills.sh run)')
+else:
+    config.setdefault('extraKnownMarketplaces', {})['caveman'] = entry
+    config.setdefault('enabledPlugins', {})['caveman@caveman'] = True
+    with open(settings_path, 'w') as f:
+        json.dump(config, f, indent=2)
+    print('  ✓ caveman — added to ~/.claude/settings.json')
+    print('    Restart Claude Code to trigger plugin auto-install from GitHub.')
+PYEOF
+}
 
 # ── Skill content ─────────────────────────────────────────────────────────────
 
@@ -264,21 +301,27 @@ EOF
 
 # ── Installer ─────────────────────────────────────────────────────────────────
 
-GENERIC=(cavecrew ship-review prompt-engineer persona-builder)
+SKILLS=(cavecrew ship-review prompt-engineer persona-builder)
+ALL=(caveman "${SKILLS[@]}")
 
 if [[ $# -gt 0 ]]; then
   INSTALL=("$@")
 else
-  INSTALL=("${GENERIC[@]}")
+  INSTALL=("${ALL[@]}")
 fi
 
-echo "Installing ${#INSTALL[@]} skill(s) to $DIR ..."
+echo "Installing ${#INSTALL[@]} item(s) ..."
 echo ""
 
 for skill in "${INSTALL[@]}"; do
+  if [[ "$skill" == "caveman" ]]; then
+    echo "  Installing caveman plugin ..."
+    install_caveman
+    continue
+  fi
   fn="write_${skill//-/_}"
   if ! declare -f "$fn" > /dev/null 2>&1; then
-    echo "  ✗ $skill — unknown skill (available: ${GENERIC[*]})"
+    echo "  ✗ $skill — unknown (available: caveman ${SKILLS[*]})"
     continue
   fi
   mkdir -p "$DIR/$skill"
@@ -291,7 +334,7 @@ for skill in "${INSTALL[@]}"; do
 done
 
 echo ""
-echo "Done. Restart Claude Code and type /<skill-name> to verify."
+echo "Done. Restart Claude Code — type /caveman or any skill trigger to verify."
 echo ""
 echo "Note: deploy-check and security-check are not included — they require"
 echo "project-specific server paths, slugs, and file references. Write them"
