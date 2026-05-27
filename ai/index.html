@@ -679,7 +679,8 @@
           <div class="step-num">3</div>
           <div class="step-body">
             <div class="step-title">Install Caveman first — token savings from session 1</div>
-            <div class="step-desc">Caveman is a plugin — add its marketplace entry to <code>~/.claude/settings.json</code> and it auto-installs on next launch. See <a href="#skills">Caveman Suite</a> for the full command set.</div>
+            <div class="step-desc">Caveman is a plugin. <a href="files/install-skills.sh" download>install-skills.sh</a> registers it automatically — run with no args or pass <code>caveman</code> specifically. It detects if already installed and reports where. See <a href="#skills">Caveman Suite</a> for the full command set.</div>
+            <div class="code-block shell">bash install-skills.sh caveman</div>
           </div>
         </div>
         <div class="step">
@@ -1017,7 +1018,7 @@ VERDICT=$(echo "$REVIEW" | head -1 | tr '[:lower:]' '[:upper:]')
           </tr>
           <tr>
             <td>install-skills.sh</td>
-            <td>Self-contained skills installer — embeds all 4 generic hub skills, no repo clone required. Run directly or paste into Claude Code.</td>
+            <td>Self-contained installer — registers the caveman plugin + installs all 4 hub skills. No repo clone required. Run directly or paste into Claude Code.</td>
             <td><a href="files/install-skills.sh" download class="btn btn-outline btn-sm">↓</a></td>
           </tr>
           <tr>
