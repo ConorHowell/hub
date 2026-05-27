@@ -501,6 +501,41 @@
       font-size: 0.875rem;
     }
 
+    /* ── Install tabs ── */
+    .install-tabs {
+      display: flex;
+      gap: 0;
+      margin: 10px 0 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .install-tab {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 6px 18px;
+      font-size: 0.84rem;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      margin-bottom: -1px;
+      transition: color 0.12s, border-color 0.12s;
+    }
+    .install-tab:hover { color: var(--text); }
+    .install-tab.active { color: var(--purple); border-bottom-color: var(--purple); }
+    .install-panel { display: none; padding: 14px 0 2px; }
+    .install-panel.active { display: block; }
+    .install-panel p { margin-bottom: 8px; }
+    .install-panel p:last-child { margin-bottom: 0; }
+    .step-note {
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: var(--purple-light);
+      border-left: 3px solid var(--purple-mid);
+      border-radius: 4px;
+      font-size: 0.82rem;
+      color: var(--purple-dark);
+    }
+
     /* ── Footer ── */
     footer {
       text-align: center;
@@ -604,7 +639,7 @@
       <h2 class="section-title">Introduction</h2>
       <p class="section-lead">A pickup-and-play resource for Claude Code — skills, bot templates, and setup guides for AI-assisted development.</p>
       <p>Claude Code is Anthropic's CLI for Claude — a terminal-based AI assistant for software engineering tasks. It reads your project files, runs commands, and edits code directly.</p>
-      <p>Install from <code>claude.ai/code</code> or via the VS Code extension (search "Claude Code" by Anthropic).</p>
+      <p>Three interfaces, all equivalent: <strong>VS Code extension</strong> (marketplace), <strong>CLI</strong> (terminal), or <strong>Desktop app</strong>. Skills, CLAUDE.md, hooks, and <code>~/.claude/</code> config work the same on all three. Install from <a href="https://claude.ai/code" target="_blank" rel="noopener">claude.ai/code</a>.</p>
       <p>What's here: global rules templates, slash command skills, and drop-in bot templates (CLAUDE.md files).</p>
     </section>
 
@@ -617,7 +652,19 @@
           <div class="step-num">1</div>
           <div class="step-body">
             <div class="step-title">Install Claude Code</div>
-            <div class="step-desc">VS Code: Extensions → search "Claude Code" by Anthropic. CLI: <code>claude.ai/code</code></div>
+            <div class="install-tabs">
+              <button class="install-tab active" data-target="tab-vscode">VS Code</button>
+              <button class="install-tab" data-target="tab-cli">CLI / Desktop</button>
+            </div>
+            <div class="install-panel active" id="tab-vscode">
+              <p>Open Extensions (<code>⌘⇧X</code> / <code>Ctrl+Shift+X</code>) → search <strong>Claude Code</strong> by Anthropic → Install.</p>
+              <p>Claude Code appears as a panel in the VS Code sidebar. Open any project folder and start a session from there.</p>
+            </div>
+            <div class="install-panel" id="tab-cli">
+              <p>Download the CLI installer or Desktop app from <a href="https://claude.ai/code" target="_blank" rel="noopener">claude.ai/code</a> (macOS, Windows, Linux).</p>
+              <p>Run <code>claude</code> in any terminal to start a session. The Desktop app wraps the same CLI in a native window.</p>
+            </div>
+            <p class="step-note">Skills, CLAUDE.md, hooks, and <code>~/.claude/</code> config work identically across VS Code, CLI, and Desktop.</p>
           </div>
         </div>
         <div class="step">
@@ -1165,6 +1212,16 @@ The /ship-review skill provides a ready-made review prompt for this pattern.
         setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 1500);
       }).catch(() => {});
     }
+
+    // Install tab switcher
+    document.querySelectorAll('.install-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.install-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.install-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.target).classList.add('active');
+      });
+    });
 
     // Sidebar active nav highlighting on scroll
     const sections = document.querySelectorAll('.doc-section');
