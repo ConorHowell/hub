@@ -18,13 +18,15 @@ By the end of this session, the user should have:
 
 ## Phase 1 — Orient
 
-Ask these questions **one at a time**. Skip any you can determine from context.
+**Ask all orientation questions in one `AskUserQuestion` call — never one at a time.**
 
-1. "What operating system are you on? (macOS, Windows with Git Bash, Linux)"
-2. "Have you used Claude Code before, or is this your first time?"
-3. "Do you have a project in mind, or are you exploring for now?"
+Use `AskUserQuestion` with these three questions simultaneously:
 
-Use answers to adapt everything that follows.
+1. Operating system — options: macOS, Windows (Git Bash), Linux
+2. Claude Code experience — options: First time, Used it a little, Familiar with it
+3. Project status — options: Have a project in mind, Just exploring for now
+
+Use answers to adapt everything that follows. Do not ask follow-ups unless an answer is ambiguous.
 
 ---
 
@@ -69,7 +71,7 @@ If `MISSING`: create `~/.claude/CLAUDE.md` with this content (adapt for Windows 
 - Before delegating: identify all git repos in scope — subdirectories can have their own `.git`.
 ```
 
-If `EXISTS`: read it and ask "Want to keep your existing global rules or replace them with a solid baseline?"
+If `EXISTS`: read it, then use `AskUserQuestion` — "Keep your existing global rules or replace with baseline?" Options: Keep existing, Replace with baseline.
 
 ---
 
@@ -78,15 +80,16 @@ If `EXISTS`: read it and ask "Want to keep your existing global rules or replace
 ### Explain first (one sentence)
 "Skills are slash commands — installed once globally, active in every project."
 
-### Ask where their skills directory is
-"Do you have a `.agents/skills/` directory, or are you starting fresh?"
+### Ask in one AskUserQuestion call:
+- "Do you have a `.agents/skills/` directory?" — options: Yes, have one already, Starting fresh, Not sure
+- "Which skills do you want to install?" — multiSelect: true — options: Caveman (recommended), Cavecrew, Ship-Review, Prompt Engineer, Persona Builder
 
-**If they have one**: list what's in it, install each with:
+**If they have a directory**: list what's in it, install each with:
 ```bash
 npx skills add <path> -a claude-code -y
 ```
 
-**If starting fresh**: explain they can download skill packages from the hub at chportfolio.us/hub/ai/, or install from a cloned repo. Ask: "Do you have a skills directory path ready, or do you need help getting one?"
+**If starting fresh**: explain they can download skill packages from the hub at chportfolio.us/hub/ai/, or use the `install-skills.sh` script linked there.
 
 ### Recommended install order
 1. Caveman (token efficiency — install first, use immediately)
@@ -94,27 +97,21 @@ npx skills add <path> -a claude-code -y
 3. Ship-Review (pre-commit gate)
 4. Prompt Engineer + Persona Builder (if they design prompts or agents)
 
-After installing each skill, verify it registered:
-```bash
-# Skill appears in Claude Code's context on next session start
-# You can tell user: "Start a new session and type /caveman to confirm it's active"
-```
-
 ---
 
 ## Phase 4 — Project Setup (if they have a project)
 
-Ask: "What are you building? Give me a one-liner — language, purpose, team size."
+Use one `AskUserQuestion` call:
+- "What are you building?" — free text (Other option covers this)
+- "Where is the project directory?" — free text
 
 Then:
-1. Ask for the project directory path
-2. Check if `<project>/CLAUDE.md` exists
-3. If not, create one using the Prompt Engineer approach:
-   - What is the project?
+1. Check if `<project>/CLAUDE.md` exists
+2. If not, gather context and create one:
    - What should Claude always do in this context?
    - What should Claude never do?
    - What's the current in-progress work (Next Steps)?
-4. Write the CLAUDE.md to `<project>/CLAUDE.md`
+3. Write the CLAUDE.md to `<project>/CLAUDE.md`
 
 Keep it short — a good CLAUDE.md is scannable, not exhaustive.
 
@@ -143,8 +140,8 @@ NEXT: Pick a task and go. Claude will read your CLAUDE.md automatically.
 
 ## Rules for This Session
 
+- **Batch questions.** Never ask one question at a time — always use `AskUserQuestion` with multiple questions in one call. Token cost of a round-trip is high.
 - Do the work, don't just give instructions. If you can run a command to create a file, run it.
-- One question at a time. Don't overwhelm with a list.
 - If something fails, diagnose and fix it — don't hand the error back to the user.
 - If the user says "skip" or "I'll do it later", move on without pushing.
 - Caveman mode is OFF during this setup guide — use clear, friendly language. Activate it after setup is confirmed complete.
