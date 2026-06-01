@@ -980,6 +980,39 @@ git -C /abs/path merge worktree-branch --ff-only    # fast-forward into main
 git -C /abs/path log --oneline -3                   # confirm main now has it
 ls /abs/path/new-file                               # verify file is on disk</div>
       <p><strong>Never assume "already up to date" means success</strong> — it may mean the merge ran against the wrong directory.</p>
+
+      <h3>Worktree failure modes</h3>
+      <p>Before trusting any agent result, run <code>git diff main..HEAD --stat</code> inside the worktree. Unexpected deletions of existing source files mean the agent worked on a stale base — do not merge.</p>
+      <div class="code-block"><strong>A — Stale base:</strong> worktree branched from an older commit.
+Symptom: git log --oneline -3 tops out before recent commits on main.
+Fix: git rebase main before merging.
+
+<strong>B — Out-of-lane edits:</strong> agent modified files outside its scope.
+Fix: cherry-pick only intended files, reject the rest.
+
+<strong>C — Uncommitted changes:</strong> git diff main..HEAD looks clean but git diff HEAD shows work.
+Fix: commit the unstaged work first, then merge.
+
+<strong>D — Duplicate declarations:</strong> stale base + symbol already committed on main.
+Symptom: runtime crash from duplicate const/function.
+Fix: run node --check &lt;file&gt; (or language equivalent) on all modified files before merging.</div>
+
+      <h3>Recovery steps</h3>
+      <div class="code-block">git log --oneline -3              # 1. Confirm worktree base commit
+git diff HEAD                     # 2. Find unstaged work — commit it
+git rebase main                   # 3. Rebase onto main, resolve conflicts
+# 4. Run syntax check on modified files
+git merge --no-commit --no-ff &lt;branch&gt;   # 5. Inspect staged diff before committing
+git diff --cached                 # 6. Final review — then commit</div>
+
+      <h3>Agent reporting — require a Shipping Status block</h3>
+      <p>Every worktree agent should end its final message with a Shipping Status block. Main session reads this to decide whether to deploy.</p>
+      <div class="code-block">## Shipping Status
+- Committed: yes | no — &lt;hash or "none"&gt;
+- Pushed to GitHub: yes | no
+- Deployed to server: yes | no
+- publish.sh used: yes | no</div>
+      <p><strong>Deploy ownership:</strong> agents commit and push only. The main session runs the deploy command — never the agent. Agents deploying independently bypass the review gate and can cause double-deploys.</p>
     </section>
 
     <!-- PRE-SHIP REVIEW -->
@@ -1048,8 +1081,28 @@ VERDICT=$(echo "$REVIEW" | head -1 | tr '[:lower:]' '[:upper:]')
           </tr>
           <tr>
             <td>MULTIAGENT.md</td>
-            <td>Multiagent workflow decision guide — complexity ladder, token budget rules, chaining patterns</td>
+            <td>Multiagent workflow decision guide — complexity ladder, token budget rules, worktree recovery, chaining patterns</td>
             <td><a href="files/MULTIAGENT.md" download class="btn btn-outline btn-sm">↓</a></td>
+          </tr>
+          <tr>
+            <td>SESSION_CHECKLIST.md</td>
+            <td>Project session checklist — start, during, and end-of-session steps for any project bot</td>
+            <td><a href="files/SESSION_CHECKLIST.md" download class="btn btn-outline btn-sm">↓</a></td>
+          </tr>
+          <tr>
+            <td>BOT_RULES.md</td>
+            <td>Hard bot rules template — worktree safety, agent reporting, deploy ownership, self-cleanup. Drop in _SYSTEM/ and reference from CLAUDE.md.</td>
+            <td><a href="files/BOT_RULES.md" download class="btn btn-outline btn-sm">↓</a></td>
+          </tr>
+          <tr>
+            <td>CONTEXT.template.md</td>
+            <td>Project context template — persona, required roles, collaboration pattern, architecture, current state. Drop in _SYSTEM/ and fill in.</td>
+            <td><a href="files/CONTEXT.template.md" download class="btn btn-outline btn-sm">↓</a></td>
+          </tr>
+          <tr>
+            <td>progress.md</td>
+            <td>Session checkpoint template — bot writes active task state at end of session, reads it at start. Drop in docs/.</td>
+            <td><a href="files/progress.md" download class="btn btn-outline btn-sm">↓</a></td>
           </tr>
         </tbody>
       </table>
