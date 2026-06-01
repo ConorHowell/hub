@@ -138,6 +138,47 @@ An agent picking up a workflow should check context pressure and adapt:
 
 ---
 
+## Worktree Recovery
+
+> Run this check before trusting any worktree agent result: `git diff main..HEAD --stat`. Unexpected `-` lines on source files = agent worked on stale base. Do not merge.
+
+### Failure Modes
+
+**A — Stale base:** Worktree branched from an older commit. Check: `git log --oneline -3` in worktree tops out before recent commits on main. Fix: rebase before merging.
+
+**B — Out-of-lane edits:** Agent modified files outside its assigned scope. Fix: cherry-pick only the intended files, reject the rest.
+
+**C — Uncommitted changes:** `git diff main..HEAD` looks clean but `git diff HEAD` shows modifications — agent left work unstaged. Fix: commit the unstaged work first.
+
+**D — Duplicate declarations:** Stale base + symbol already committed on main → duplicate `const`/`function`. Causes runtime crash. Fix: run `node --check <file>` (or language equivalent) on all modified files before merging.
+
+### Recovery Steps
+
+```bash
+git log --oneline -3          # 1. Confirm base commit
+git diff HEAD                 # 2. Find any uncommitted work — commit it
+git rebase main               # 3. Rebase onto main, resolve conflicts
+# 4. Run syntax check on modified files (node --check, python -m py_compile, etc.)
+git merge --no-commit --no-ff <branch>   # 5. Inspect staged diff before committing
+git diff --cached             # 6. Final review — then commit
+```
+
+### Agent Reporting Protocol
+
+Every worktree agent must end with a **Shipping Status block** — main thread reads this to decide next action:
+
+```
+## Shipping Status
+- Committed: yes | no — <hash or "none">
+- Pushed to GitHub: yes | no
+- Deployed to server: yes | no
+- publish.sh used: yes | no
+```
+
+**Deploy ownership:** agents commit + push only. Main thread runs `./publish.sh` — never the agent. Agents deploying independently bypass the ship-review gate and can cause double-deploys.
+
+---
+
 ## Chaining Patterns
 
 **Locate → fix → verify** (most common):
