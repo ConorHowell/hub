@@ -50,6 +50,36 @@ Reference for Claude Code sessions. Use the simplest level that works. Higher = 
 
 ---
 
+## Dynamic Workflow Invocation
+
+**Trigger phrase** (say this to Claude to initiate):
+```
+Set me up a dynamic workflow to [task description]
+```
+
+**Check active or historical workflows:**
+```
+/workflows
+```
+
+**Save location:** Claude defaults to a system directory. Always specify your project folder explicitly:
+```
+Save the workflow file to /path/to/project/workflows/
+```
+
+**vs `/goal`:**
+| `/goal` | Dynamic workflow |
+|---------|-----------------|
+| Depth — loops until done-criteria met | Width — many agents run once in parallel |
+| Single agent, multiple passes | Many agents, each handles one piece |
+| Use for: iterative refinement, retry until passing | Use for: parallel independent subtasks |
+
+**UltraCode warning:** UltraCode mode defaults to dynamic workflows silently. It also uses Extra High effort reasoning and may bypass manual permission checks. Do not enable UltraCode unless you explicitly want workflow-first behavior.
+
+**Cost reality:** Dynamic workflows are the most expensive pattern. One poorly-scoped workflow session can consume half a monthly API budget. Confirm with user before initiating.
+
+---
+
 ## Token-Saving Rules
 
 Apply these at every level.
