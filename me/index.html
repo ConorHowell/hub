@@ -466,7 +466,7 @@
 
     function isAuthed() {
       try {
-        var stored = JSON.parse(sessionStorage.getItem(KEY) || '{}');
+        var stored = JSON.parse(localStorage.getItem(KEY) || '{}');
         return stored.hash === HASH && Date.now() - stored.timestamp < TTL;
       } catch(e) { return false; }
     }
@@ -496,8 +496,10 @@
       if (!val) return;
       var hash = await sha256(val);
       if (hash === HASH) {
-        sessionStorage.setItem(KEY, JSON.stringify({ hash: hash, timestamp: Date.now() }));
+        localStorage.setItem(KEY, JSON.stringify({ hash: hash, timestamp: Date.now() }));
         overlay.remove();
+        var returnPath = new URLSearchParams(window.location.search).get('return');
+        if (returnPath && returnPath.startsWith('/') && !returnPath.startsWith('//')) { window.location.href = returnPath; return; }
       } else {
         err.textContent = 'Incorrect password';
         card.classList.remove('auth-shake');
