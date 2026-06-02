@@ -613,7 +613,7 @@
       userBtn.classList.toggle('is-authed', authed)
       loggedInEl.hidden = !authed
       loginFormEl.hidden = authed
-      if (authed) emailLabel.textContent = pb.authStore.model?.email || 'Signed in'
+      if (authed) emailLabel.textContent = (pb.authStore.record ?? pb.authStore.model)?.email || 'Signed in'
     }
 
     if (pb.authStore.isValid) {
