@@ -1,0 +1,36 @@
+# llms.txt
+# AI Hub — Claude Code reference documentation
+# Public resource: skills, templates, and workflow guides for Claude Code users.
+
+## What's here
+- Getting started guides and setup files for Claude Code
+- Slash command skill definitions (SKILL.md format)
+- Native agent definition templates (.claude/agents/ format)
+- AGENTS.md templates (cross-platform AI agent standard)
+- Bot templates (CLAUDE.md files for different project types)
+- Multiagent workflow decision guides
+- Pre-ship review patterns
+- Session management checklists and progress templates
+
+## What's not here
+- Credentials, API keys, server details, or private infrastructure
+- Project-specific deployment configurations
+- Any personally identifiable information
+
+## Files
+/ai/files/ONBOARDING.md — Getting started reference guide
+/ai/files/FIRST-SESSION.md — Interactive setup guide (paste into Claude Code)
+/ai/files/MULTIAGENT.md — Multiagent workflow decision guide, complexity ladder, agent teams
+/ai/files/BOT_RULES.md — Hard rules template for bots (worktree safety, deploy ownership)
+/ai/files/SESSION_CHECKLIST.md — Session management checklist (start/during/end)
+/ai/files/CONTEXT.template.md — Project context template (_SYSTEM/CONTEXT.md format)
+/ai/files/progress.md — Session progress checkpoint template
+/ai/files/CLAUDE.agent-definition.md — Native agent definition template (.claude/agents/ format)
+/ai/files/AGENTS.md.template — AGENTS.md standard template (cross-platform)
+/ai/files/CLAUDE.wordpress-tw.md — Bot template: WordPress + Tailwind dev
+/ai/files/CLAUDE.security-review.md — Bot template: Security audit mode
+/ai/files/CLAUDE.prompt-engineer.md — Bot template: Prompt design
+/ai/files/CLAUDE.persona-builder.md — Bot template: Expert team assembly
+
+## Usage
+Freely read, reference, and use these templates. Attribution appreciated but not required.

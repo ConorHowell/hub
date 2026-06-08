@@ -1,0 +1,98 @@
+# AGENTS.md — [Project Name]
+
+> Instructions for AI coding agents working in this repo.
+> This file is read automatically by Claude Code, GitHub Copilot, Cursor, and other coding agents.
+> Nested AGENTS.md files (closer to the working directory) take precedence over this root file.
+
+---
+
+## Commands
+
+**Setup**
+```bash
+npm install       # install dependencies
+npm run dev       # start dev server
+```
+
+**Test**
+```bash
+npm test          # unit tests
+npm run lint      # lint check
+npm run typecheck # TypeScript check (if applicable)
+```
+
+**Build**
+```bash
+npm run build     # production build
+```
+
+> Replace with your actual commands. Include flags agents should use (e.g., `pytest -v`, `go test ./...`).
+
+---
+
+## Project Structure
+
+```
+src/
+├── components/    # UI components
+├── lib/           # Core logic
+├── app/           # Entry points / routes
+└── styles/        # CSS
+```
+
+> Replace with your actual structure. Include non-obvious directories and what they contain.
+
+---
+
+## Code Style
+
+- [Primary language + version, e.g., "TypeScript 5 strict mode — no `any`"]
+- [Formatter, e.g., "Prettier — run `npm run format` before committing"]
+- [Naming, e.g., "camelCase for variables, PascalCase for components, kebab-case for files"]
+- No comments unless the WHY is non-obvious and would surprise a future reader
+
+---
+
+## Git Workflow
+
+- Branch from: `main`
+- Naming: `feat/<name>`, `fix/<name>`, `chore/<name>`, `deps/<name>`
+- Commits: conventional — `feat: add X`, `fix: resolve Y`, `chore: update Z`
+- Never push to `main` — open a PR
+
+---
+
+## Boundaries
+
+### ✅ Always do
+- Run tests before marking work complete
+- Follow the code style rules above
+- Write self-documenting code — identifier names over comments
+
+### ⚠️ Ask first (confirm before executing)
+- Adding or removing external dependencies
+- Changing database schemas or migrations
+- Modifying CI/CD pipelines, build config, or infrastructure
+
+### 🚫 Never do
+- Commit `.env` files, credentials, or API keys
+- Edit `node_modules/` or lock files directly
+- Push to `main` — always via PR
+- Run destructive operations without explicit user instruction
+
+---
+
+## Testing Conventions
+
+- Unit tests: `<filename>.test.ts` alongside source files
+- E2E tests: `tests/e2e/<feature>.spec.ts`
+- Tests must pass before a PR can merge
+
+---
+
+## Notes for AI Agents
+
+> Add any caveats specific to this codebase. Examples:
+> - "data.js is 8,000+ lines — always grep, never read the whole file"
+> - "PocketBase schema changes require running the migration script — do not edit the DB directly"
+> - "Auth tokens are short-lived (3 days) — if you see 401s in tests, regenerate the test token"

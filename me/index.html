@@ -380,6 +380,23 @@
       .tool-link:hover { transform: none; }
       .link-arrow { transition: none; }
     }
+    #profile-btn {
+      position: fixed; top: 14px; right: 14px; z-index: 200;
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--amber); color: #04040d;
+      border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 14px rgba(240,168,48,0.3);
+      transition: opacity .2s;
+    }
+    #profile-btn:hover { opacity: 0.85; }
+    #profile-dropdown {
+      position: fixed; top: 58px; right: 14px; z-index: 200;
+      background: var(--surface); border: 1px solid rgba(240,168,48,0.22);
+      border-radius: 10px; padding: 14px 16px; min-width: 200px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      animation: panelIn .2s ease both;
+    }
   </style>
 </head>
 <body>
@@ -483,7 +500,51 @@
       } catch(e) { return false; }
     }
 
-    if (isPbAuthed() || isHashAuthed()) return;
+    function injectProfileBtn() {
+      var btn = document.createElement('button');
+      btn.id = 'profile-btn';
+      btn.title = 'Account';
+      btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" fill="currentColor"/></svg>';
+      document.body.appendChild(btn);
+      var dropdown = null;
+
+      function getLabel() {
+        try {
+          var raw = localStorage.getItem('pocketbase_auth');
+          if (raw) {
+            var parsed = JSON.parse(raw);
+            if (parsed.record && parsed.record.email) return parsed.record.email;
+            if (parsed.token) {
+              var p = JSON.parse(atob(parsed.token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+              if (p.email) return p.email;
+            }
+          }
+        } catch(e) {}
+        return 'Local access';
+      }
+
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (dropdown) { dropdown.remove(); dropdown = null; return; }
+        dropdown = document.createElement('div');
+        dropdown.id = 'profile-dropdown';
+        dropdown.innerHTML =
+          '<div style="font-size:0.72rem;color:var(--muted);margin-bottom:10px;word-break:break-all">' + getLabel() + '</div>' +
+          '<button id="signout-btn" style="width:100%;background:rgba(240,168,48,0.1);border:1px solid rgba(240,168,48,0.25);border-radius:6px;color:var(--amber);padding:8px;font-size:0.8rem;font-weight:700;cursor:pointer;font-family:inherit">Sign out</button>';
+        document.body.appendChild(dropdown);
+        dropdown.querySelector('#signout-btn').addEventListener('click', function() {
+          localStorage.removeItem('priv_hub_auth');
+          localStorage.removeItem('pocketbase_auth');
+          window.location.reload();
+        });
+        document.addEventListener('click', function close() {
+          if (dropdown) { dropdown.remove(); dropdown = null; }
+          document.removeEventListener('click', close);
+        });
+      });
+    }
+
+    if (isPbAuthed() || isHashAuthed()) { injectProfileBtn(); return; }
 
     var overlay = document.createElement('div');
     overlay.className = 'auth-overlay';
