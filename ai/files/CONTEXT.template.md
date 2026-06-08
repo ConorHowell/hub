@@ -32,6 +32,8 @@
 
 - **[Role]:** [specific files, data, context required to contribute]
 
+> **For persistent Claude Code agents:** define per-project specialists as `.claude/agents/<name>.md` files rather than persona descriptions. Native agents run in isolated context windows with tool restrictions and model routing — see [CLAUDE.agent-definition.md](CLAUDE.agent-definition.md). Use persona descriptions here for collaboration patterns within a single session; use native agent definitions for recurring specialist roles.
+
 ---
 
 ## Architecture

@@ -735,8 +735,9 @@
     </div>
 
     <div class="nav-group">
-      <div class="nav-group-label">Skills</div>
+      <div class="nav-group-label">Extensions</div>
       <a href="#skills" class="nav-link">Slash Commands</a>
+      <a href="#native-agents" class="nav-link">Native Agents</a>
       <a href="#write-skill" class="nav-link">Write Your Own</a>
     </div>
 
@@ -1031,6 +1032,125 @@ description: &gt;
       <div class="code-block shell">npx skills add ./.agents/skills/&lt;name&gt; -a claude-code -y</div>
     </section>
 
+    <!-- NATIVE AGENTS -->
+    <section class="doc-section" id="native-agents">
+      <h2 class="section-title">Native Agent Definitions</h2>
+      <p class="section-lead">Beyond slash commands — reusable agent blueprints with tool restrictions, model routing, and isolated context windows.</p>
+
+      <p>Skills (slash commands) and native agents serve different purposes:</p>
+
+      <table class="files-table" style="margin-bottom: 28px;">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Skills (<code>.agents/skills/</code>)</th>
+            <th>Native agents (<code>.claude/agents/</code>)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Invoked by</td>
+            <td>Slash command — manual</td>
+            <td>Claude delegates automatically, or by name</td>
+          </tr>
+          <tr>
+            <td>Runs in</td>
+            <td>Main context window</td>
+            <td>Isolated context window</td>
+          </tr>
+          <tr>
+            <td>Tool restriction</td>
+            <td>No — all tools available</td>
+            <td>Yes — per-agent allowlist</td>
+          </tr>
+          <tr>
+            <td>Model control</td>
+            <td>No</td>
+            <td>Yes — route cheap tasks to Haiku</td>
+          </tr>
+          <tr>
+            <td>Context impact</td>
+            <td>Floods main thread</td>
+            <td>Output stays isolated</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>Define agents as <code>.claude/agents/&lt;name&gt;.md</code> files — globally in <code>~/.claude/agents/</code> or per-project in <code>&lt;project&gt;/.claude/agents/</code>. Claude reads the description to decide when to route tasks automatically.</p>
+
+      <h3>Format</h3>
+      <div class="code-block">---
+name: reviewer
+description: &gt;
+  Adversarial diff reviewer. Use after any builder finishes, before shipping.
+  Fresh context — no knowledge of intent, only the code.
+tools:
+  - Read
+  - Grep
+  - Bash
+model: claude-sonnet-4-6
+---
+
+You are an adversarial reviewer. Find problems. No praise.
+Output: path:line: 🔴 CRITICAL: problem. fix.
+First line: APPROVE or FLAG</div>
+
+      <h3>Model routing guide</h3>
+      <ul>
+        <li>Search, grep, read-only investigation → <code>claude-haiku-4-5-20251001</code> (10x cheaper)</li>
+        <li>Code review, implementation, reasoning → <code>claude-sonnet-4-6</code></li>
+        <li>Security audit, complex synthesis → <code>claude-sonnet-4-6</code></li>
+      </ul>
+
+      <h3>Common agent types</h3>
+      <table class="files-table" style="margin-bottom: 28px;">
+        <thead>
+          <tr>
+            <th>Agent</th>
+            <th>Scope</th>
+            <th>Tools</th>
+            <th>Model</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>investigator</code></td>
+            <td>Read-only code location</td>
+            <td>Read, Grep, Bash</td>
+            <td>Haiku</td>
+          </tr>
+          <tr>
+            <td><code>reviewer</code></td>
+            <td>Adversarial diff review</td>
+            <td>Read, Grep, Bash</td>
+            <td>Sonnet</td>
+          </tr>
+          <tr>
+            <td><code>security-reviewer</code></td>
+            <td>OWASP / auth / access control</td>
+            <td>Read, Grep, Bash</td>
+            <td>Sonnet</td>
+          </tr>
+          <tr>
+            <td><code>&lt;project&gt;-specialist</code></td>
+            <td>Project-specific build context</td>
+            <td>Read, Edit, Write, Bash, Grep</td>
+            <td>Sonnet</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout">
+        <div class="callout-label">Full Decision Guide</div>
+        <p>When to use native agents vs cavecrew vs worktree agents vs dynamic workflows — see <a href="files/MULTIAGENT.md" download>MULTIAGENT.md</a> for the complete complexity ladder, chaining patterns, and agent teams playbook.</p>
+      </div>
+
+      <div class="btn-row">
+        <a href="files/CLAUDE.agent-definition.md" download class="btn btn-primary">↓ Agent definition template</a>
+        <a href="files/AGENTS.md.template" download class="btn btn-outline">↓ AGENTS.md template</a>
+      </div>
+    </section>
+
     <!-- BOT TEMPLATES -->
     <section class="doc-section" id="bot-templates">
       <h2 class="section-title">Bot Templates</h2>
@@ -1066,6 +1186,22 @@ description: &gt;
           <div class="template-tags">Expert team assembly · Collaboration patterns · Domain-agnostic · Role selection</div>
           <div class="btn-row">
             <a href="files/CLAUDE.persona-builder.md" download class="btn btn-primary">↓ Download CLAUDE.md</a>
+          </div>
+        </div>
+
+        <div class="template-card">
+          <div class="template-name">Native Agent Definition</div>
+          <div class="template-tags">.claude/agents/ format · Tool restrictions · Model routing · Auto-delegation · Global or per-project</div>
+          <div class="btn-row">
+            <a href="files/CLAUDE.agent-definition.md" download class="btn btn-primary">↓ Download template</a>
+          </div>
+        </div>
+
+        <div class="template-card">
+          <div class="template-name">AGENTS.md</div>
+          <div class="template-tags">Cross-platform standard · Claude Code · GitHub Copilot · Cursor · Commands, boundaries, style</div>
+          <div class="btn-row">
+            <a href="files/AGENTS.md.template" download class="btn btn-primary">↓ Download template</a>
           </div>
         </div>
       </div>
@@ -1206,6 +1342,16 @@ VERDICT=$(echo "$REVIEW" | head -1 | tr '[:lower:]' '[:upper:]')
             <td><a href="files/MULTIAGENT.md" download class="btn btn-outline btn-sm">↓</a></td>
           </tr>
           <tr>
+            <td>CLAUDE.agent-definition.md</td>
+            <td>Native agent definition template — .claude/agents/ format with tool restrictions, model routing, and auto-delegation instructions</td>
+            <td><a href="files/CLAUDE.agent-definition.md" download class="btn btn-outline btn-sm">↓</a></td>
+          </tr>
+          <tr>
+            <td>AGENTS.md.template</td>
+            <td>AGENTS.md standard template — cross-platform (Claude Code, Copilot, Cursor). Commands, structure, code style, git workflow, boundaries.</td>
+            <td><a href="files/AGENTS.md.template" download class="btn btn-outline btn-sm">↓</a></td>
+          </tr>
+          <tr>
             <td>SESSION_CHECKLIST.md</td>
             <td>Project session checklist — start, during, and end-of-session steps for any project bot</td>
             <td><a href="files/SESSION_CHECKLIST.md" download class="btn btn-outline btn-sm">↓</a></td>
@@ -1234,174 +1380,22 @@ VERDICT=$(echo "$REVIEW" | head -1 | tr '[:lower:]' '[:upper:]')
   </main>
 
   <script>
-    const ONBOARDING_TEXT = `# Claude Code — Getting Started
-
-## What is Claude Code?
-
-Claude Code is Anthropic's CLI for Claude — a terminal-based AI assistant for software engineering tasks. It reads your project files, runs commands, and edits code directly.
-
-Install: claude.ai/code or via the VS Code extension (search "Claude Code" by Anthropic).
-
----
-
-## Zero to Equipped Bot — Quickstart
-
-Ideal order for a new machine or new project:
-
-1. Install Claude Code
-   VS Code: Extensions → search "Claude Code" by Anthropic
-   CLI: see claude.ai/code
-
-2. Set global rules — ~/.claude/CLAUDE.md
-   Download a template from this hub. Drop it at ~/.claude/CLAUDE.md.
-   Global rules apply to every project. Put session-start behavior, safety rules, and subagent
-   delegation rules here (see Subagent / Worktree Safety Rules below).
-
-3. Install Caveman first (token savings from session 1)
-     npx skills add <path-to-caveman-skill-dir> -a claude-code -y
-   Skills are local directories — you need the source files before installing. Clone a skills
-   repo, or write your own. Skills install globally into ~/.claude/ — run once, active in all
-   projects and sessions.
-
-4. Install remaining skills
-     npx skills add <path-to-skill-dir> -a claude-code -y
-   Repeat for each skill, or use a setup.sh loop.
-
-5. Add a project CLAUDE.md
-   Drop CLAUDE.md at your project root. Project rules override global rules.
-
-6. Design specialized prompts with /prompt-engineer
-   Invoke and answer the 6 intake questions for any specialized agent role.
-
-7. Verify everything works
-   Start a Claude Code session. Type /caveman — terse response confirms skills loaded.
-   Installed skills appear listed in the session startup context.
-
----
-
-## Bot Templates (CLAUDE.md files)
-
-A CLAUDE.md file at your project root tells Claude who it is, how to behave, and what the project is. Drop one in and Claude reads it at every session start.
-
-What to include:
-- Role and persona in this project
-- Project structure and key files
-- Rules — what to always do, what to never do
-- Next Steps — current in-progress work so any bot can pick up immediately
-
-Two scopes:
-- ~/.claude/CLAUDE.md — global rules, apply across all projects
-- <project>/CLAUDE.md — project-specific rules, override globals
-
----
-
-## Skills (slash commands)
-
-Skills install GLOBALLY into ~/.claude/ — run once from anywhere, active in all projects and sessions.
-The -a claude-code flag targets Claude Code. -y skips confirmation.
-
-  npx skills add <path-to-skill-directory> -a claude-code -y
-
-Verify a skill installed: start a session, run its trigger (e.g. /caveman). Skills also appear listed at session start.
-
-Common failure: directory passed to npx skills add must contain SKILL.md with valid frontmatter
-(name: and description: fields). Missing file or malformed frontmatter = silent failure.
-
-Start with Caveman — cuts token usage ~75%, unlocks full caveman suite.
-
-Skills available here:
-
-Skill                           | Trigger                  | What it does
---------------------------------|--------------------------|---------------------------------------------
-/caveman                        | "caveman mode"           | Terse output mode (~75% token reduction)
-/caveman-commit                 | "write a commit"         | Conventional commits generator
-/caveman-review                 | "review this PR"         | One-line PR review comments
-/caveman-compress FILE          | "compress memory file"   | Compress .md files in-place
-/caveman-stats                  | —                        | Real token usage from session log
-/caveman-help                   | —                        | Quick skill reference card
-/cavecrew                       | "delegate to subagent"   | Decision guide for subagent delegation
-/ship-review                    | automatic                | Pre-commit diff gate — flags bugs before ship
-/deploy-check <project>         | "audit deploy"           | Audits deploy pipeline — flags, paths, files
-/security-check <project>       | "security audit"         | XSS, CSP, SRI, auth, OWASP Top 10
-/prompt-engineer                | "engineer a prompt"      | 5-phase prompt design with adversarial review
-/persona-builder                | "build a persona"        | Expert team assembly for any prompt domain
-
----
-
-## Writing Your Own Skill
-
-A skill is two files in .agents/skills/<name>/:
-
-SKILL.md — the prompt with frontmatter:
-  ---
-  name: my-skill
-  description: >
-    What this skill does and when to activate it. Include trigger phrases.
-  ---
-  [Your skill prompt here]
-
-README.md — short human summary of what it does and how to trigger it.
-
-Register after creating:
-  npx skills add ./.agents/skills/<name> -a claude-code -y
-
----
-
-## Subagent / Worktree Safety Rules
-
-Add these rules to ~/.claude/CLAUDE.md so every bot, in every project, follows them automatically.
-
-When using agents that spawn git worktrees — follow these rules to prevent silent failures:
-
-Use absolute paths with -C flag, never cd:
-  # CORRECT — no CWD drift between bash calls
-  git -C /absolute/path/to/repo status
-
-  # WRONG — cd persists across bash calls, later git commands target wrong repo
-  cd /some/path && git status
-
-Identify all git repos before delegating. Subdirectories can have their own .git:
-  ls <subdir>/.git   # exists = separate repo
-
-Tell the agent explicitly which repo each file belongs to when multiple repos exist in the tree.
-
-Worktree agents commit to a temp branch, not main. After agent finishes, merge explicitly:
-  git -C /abs/path log --oneline worktree-branch -3   # verify commit is there
-  git -C /abs/path merge worktree-branch --ff-only    # fast-forward into main
-  git -C /abs/path log --oneline -3                   # confirm main now has it
-  ls /abs/path/new-file                               # verify file is on disk
-
-Never assume "already up to date" means success — it may mean the merge ran against the wrong directory.
-
----
-
-## Pre-ship Review Pattern
-
-Run a skill automatically before committing to catch bugs.
-
-In your deploy or commit script:
-  REVIEW=$(echo "$DIFF" | claude --print "$REVIEW_PROMPT")
-  VERDICT=$(echo "$REVIEW" | head -1 | tr '[:lower:]' '[:upper:]')
-  [ "$VERDICT" = "APPROVE" ] || read -p "Issues flagged. Ship anyway? (y/N): " CONFIRM
-
-The /ship-review skill provides a ready-made review prompt for this pattern.
-
----
-
-## Tips
-
-- /caveman at session start reduces context bloat on long sessions
-- Skills install globally — install once per machine, active in all projects
-- Prompt Engineer + Persona Builder work best for designing prompts for specialized agents
-- deploy-check and security-check work on any project — pass your own identifier as argument`;
 
     function copyOnboarding(btn) {
-      navigator.clipboard.writeText(ONBOARDING_TEXT).then(() => {
-        const orig = btn.textContent;
-        btn.textContent = '✓ Copied';
-        btn.classList.add('copied');
-        setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 2000);
-      }).catch(() => {});
+      fetch('files/ONBOARDING.md')
+        .then(r => r.text())
+        .then(text => {
+          navigator.clipboard.writeText(text).then(() => {
+            const orig = btn.textContent;
+            btn.textContent = '✓ Copied';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 2000);
+          }).catch(() => {});
+        })
+        .catch(() => {
+          btn.textContent = 'Error — try download';
+          setTimeout(() => { btn.textContent = '⎘ Copy text'; }, 2500);
+        });
     }
 
     function copyTrigger(trigger, btn) {

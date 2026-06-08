@@ -63,6 +63,8 @@ A `CLAUDE.md` file at your project root tells Claude who it is, how to behave, a
 
 ## Skills (slash commands)
 
+**Skills** are slash commands — manually invoked, run in the main context. **Native agents** (`.claude/agents/`) are a different system: they run in isolated context windows with tool restrictions and model routing. See the Native Agent Definitions section below for that pattern. This section covers slash command skills.
+
 Skills extend Claude Code with slash commands. They install **globally** — run the install command once from anywhere, and the skill is available in every project and session.
 
 ```bash
@@ -117,6 +119,63 @@ Register after creating:
 ```bash
 npx skills add ./.agents/skills/<name> -a claude-code -y
 ```
+
+---
+
+## Native Agent Definitions (.claude/agents/)
+
+Skills are slash commands — you invoke them manually. Native agents are different: they run in their own isolated context window and Claude delegates to them automatically based on the task description.
+
+| | Skills (`.agents/skills/`) | Native agents (`.claude/agents/`) |
+|---|---|---|
+| Invoked by | Slash command | Claude auto-delegates, or you name them |
+| Runs in | Main context | Isolated context window |
+| Tool restriction | No | Yes — allowlist per agent |
+| Model control | No | Yes — route cheap tasks to Haiku |
+| Context impact | Floods main thread | Output stays isolated |
+
+### Format
+
+```yaml
+---
+name: investigator
+description: >
+  Read-only code locator. Use for "where is X defined", "what calls Y",
+  multi-file searches. Returns file:line table. Never suggests fixes.
+tools:
+  - Read
+  - Grep
+  - Bash
+model: claude-haiku-4-5-20251001
+---
+
+You are a read-only code investigator. Find and report. Never fix, suggest, or refactor.
+Output: path:line — description
+```
+
+### Placement
+
+- `~/.claude/agents/` — global agents, available in every project
+- `<project>/.claude/agents/` — project-specific agents, scoped to that codebase
+
+### Model routing
+
+| Task type | Model |
+|-----------|-------|
+| Search, grep, read-only | `claude-haiku-4-5-20251001` (10x cheaper) |
+| Code review, implementation | `claude-sonnet-4-6` |
+| Security audit, complex synthesis | `claude-sonnet-4-6` |
+
+### Common agent types
+
+| Agent | Scope | Tools | Model |
+|-------|-------|-------|-------|
+| `investigator` | Read-only code location | Read, Grep, Bash | Haiku |
+| `reviewer` | Adversarial diff review | Read, Grep, Bash | Sonnet |
+| `security-reviewer` | OWASP / auth / access control | Read, Grep, Bash | Sonnet |
+| `<project>-specialist` | Project-specific build context | Read, Edit, Write, Bash, Grep | Sonnet |
+
+Download the agent definition template: `CLAUDE.agent-definition.md`
 
 ---
 
