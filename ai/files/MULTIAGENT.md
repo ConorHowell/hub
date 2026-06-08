@@ -18,6 +18,55 @@ Reference for Claude Code sessions. Use the simplest level that works. Higher = 
 
 ---
 
+## Native Subagent Definitions (`.claude/agents/`)
+
+Claude Code supports reusable subagent blueprints stored as `.claude/agents/<name>.md` files. These differ from skills (slash commands) in three key ways:
+
+| | Skills (`.agents/skills/`) | Native agents (`.claude/agents/`) |
+|---|---|---|
+| Invoked by | Slash command | Claude delegates automatically OR by name |
+| Runs in | Main context | Isolated context window |
+| Tool restriction | No | Yes — per-agent allowlist |
+| Model control | No | Yes — route cheap tasks to Haiku |
+| Context impact | Floods main thread | Output stays isolated |
+
+### How to define an agent
+
+```markdown
+---
+name: investigator
+description: When to use this agent — Claude reads this to decide when to route tasks here.
+tools:
+  - Read
+  - Grep
+  - Bash
+model: claude-haiku-4-5-20251001
+---
+
+Agent system prompt goes here.
+```
+
+### Model routing guide
+
+| Task type | Model |
+|-----------|-------|
+| Search, grep, read-only investigation | `claude-haiku-4-5-20251001` |
+| Code review, implementation, reasoning | `claude-sonnet-4-6` |
+| Security review, architecture, complex synthesis | `claude-sonnet-4-6` |
+
+### Recommended agent types
+
+| Agent | Scope | Tools | Model |
+|-------|-------|-------|-------|
+| `investigator` | Read-only code location | Read, Grep, Bash | Haiku |
+| `reviewer` | Adversarial diff review | Read, Grep, Bash | Sonnet |
+| `security-reviewer` | OWASP / auth / access control | Read, Grep, Bash | Sonnet |
+| `<project>-specialist` | Project-specific context + build | Read, Edit, Write, Bash, Grep | Sonnet |
+
+Place global agents in `.claude/agents/`. Place project-specific agents in `<ProjectDir>/.claude/agents/`.
+
+---
+
 ## Level Decision Triggers
 
 **→ cavecrew-investigator** (never inline grep):
@@ -198,6 +247,43 @@ Skip investigator. Hand `path:line` directly to `cavecrew-builder`.
 3. `cavecrew-reviewer` reviews diff
 4. `./publish.sh <project> "message"` ships
 
+
+---
+
+## Agent Teams
+
+Agent Teams allow multiple subagents to work in parallel with shared coordination. Enable with:
+
+```json
+{ "env": { "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1" } }
+```
+in `.claude/settings.json`.
+
+### When to use
+
+| Pattern | When |
+|---------|------|
+| **Parallel review** | 3 reviewers (security, performance, tests) audit the same diff simultaneously |
+| **Competing hypotheses** | Multiple agents test different bug theories independently |
+| **Cross-layer feature** | Frontend agent + backend agent + test-writer agent work in parallel |
+| **Worktree agent** | One domain, sequential work — use this instead |
+
+**Decision rule:** Use agent teams when work has ≥2 independent domains that benefit from cross-agent communication. Use worktree agents when work is sequential or touches only one domain.
+
+### Parallel review pattern (most common)
+
+Spawn 3 reviewer subagents in one message, each with a different lens:
+
+1. **Security reviewer** — OWASP, auth, injection
+2. **Logic reviewer** — correctness, edge cases, regression risk
+3. **Test reviewer** — test coverage gaps, assertions that could fail silently
+
+Aggregate findings in main thread before shipping.
+
+### Cost reality
+
+Agent teams multiply token usage. A 3-agent parallel review costs ~3x a single review. Use when the risk of a missed bug exceeds the cost. Skip for low-risk mechanical changes.
+
 ---
 
 ## Managed Agents API (building AI products)
@@ -231,9 +317,12 @@ For applications built with the Anthropic SDK — not for Claude Code sessions.
 Task type                     → Level
 ─────────────────────────────────────
 Single known file              → inline
-Find where X is defined        → cavecrew-investigator
+Find where X is defined        → investigator agent
+Find code (multi-file)         → investigator agent
 Fix 1-2 files (path known)    → cavecrew-builder
-Review a diff                  → cavecrew-reviewer
+Review a diff (fresh context)  → reviewer agent
+Security audit                 → security-reviewer agent
+Project-specific build         → <project>-specialist agent
 3+ file feature/refactor       → worktree agent
 5+ parallel independent tasks  → dynamic workflow
 Design a prompt                → /prompt-engineer

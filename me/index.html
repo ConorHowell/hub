@@ -464,13 +464,6 @@
       return Array.from(new Uint8Array(buf)).map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
     }
 
-    function isAuthed() {
-      try {
-        var stored = JSON.parse(localStorage.getItem(KEY) || '{}');
-        return stored.hash === HASH && Date.now() - stored.timestamp < TTL;
-      } catch(e) { return false; }
-    }
-
     function isPbAuthed() {
       try {
         var raw = localStorage.getItem('pocketbase_auth');
@@ -483,47 +476,128 @@
       } catch(e) { return false; }
     }
 
-    if (isAuthed() || isPbAuthed()) return;
+    function isHashAuthed() {
+      try {
+        var stored = JSON.parse(localStorage.getItem(KEY) || '{}');
+        return stored.hash === HASH && Date.now() - stored.timestamp < TTL;
+      } catch(e) { return false; }
+    }
+
+    if (isPbAuthed() || isHashAuthed()) return;
 
     var overlay = document.createElement('div');
     overlay.className = 'auth-overlay';
     overlay.innerHTML =
       '<div class="auth-card" id="auth-card">' +
         '<h1>Private Hub</h1>' +
-        '<p>Enter your password to continue</p>' +
-        '<input class="auth-input" type="password" id="auth-input" placeholder="Password" autocomplete="current-password" />' +
-        '<button class="auth-btn" id="auth-btn">Unlock</button>' +
+        '<p>Sign in to continue</p>' +
+        '<div id="pb-form">' +
+          '<input class="auth-input" type="email" id="auth-email" placeholder="Email" autocomplete="email" />' +
+          '<input class="auth-input" type="password" id="auth-password" placeholder="Password" autocomplete="current-password" />' +
+          '<button class="auth-btn" id="auth-btn">Sign In</button>' +
+        '</div>' +
+        '<div id="hash-form" style="display:none">' +
+          '<input class="auth-input" type="password" id="auth-hash-input" placeholder="Access code" autocomplete="current-password" />' +
+          '<button class="auth-btn" id="auth-hash-btn">Unlock</button>' +
+        '</div>' +
         '<div class="auth-error" id="auth-error"></div>' +
+        '<div style="margin-top:14px">' +
+          '<span id="toggle-to-hash" style="color:var(--muted);font-size:0.75rem;cursor:pointer;text-decoration:underline">Use access code instead</span>' +
+          '<span id="toggle-to-pb" style="color:var(--muted);font-size:0.75rem;cursor:pointer;text-decoration:underline;display:none">Use account login instead</span>' +
+        '</div>' +
       '</div>';
     document.body.appendChild(overlay);
 
-    var input = overlay.querySelector('#auth-input');
-    var btn   = overlay.querySelector('#auth-btn');
-    var err   = overlay.querySelector('#auth-error');
-    var card  = overlay.querySelector('#auth-card');
-    input.focus();
+    var emailInput    = overlay.querySelector('#auth-email');
+    var passwordInput = overlay.querySelector('#auth-password');
+    var pbBtn         = overlay.querySelector('#auth-btn');
+    var hashInput     = overlay.querySelector('#auth-hash-input');
+    var hashBtn       = overlay.querySelector('#auth-hash-btn');
+    var err           = overlay.querySelector('#auth-error');
+    var card          = overlay.querySelector('#auth-card');
+    var pbForm        = overlay.querySelector('#pb-form');
+    var hashForm      = overlay.querySelector('#hash-form');
+    var toggleToHash  = overlay.querySelector('#toggle-to-hash');
+    var toggleToPb    = overlay.querySelector('#toggle-to-pb');
+    emailInput.focus();
 
-    async function attempt() {
-      var val = input.value;
+    function shake(msg) {
+      err.textContent = msg;
+      card.classList.remove('auth-shake');
+      void card.offsetWidth;
+      card.classList.add('auth-shake');
+    }
+
+    function redirect() {
+      overlay.remove();
+      var returnPath = new URLSearchParams(window.location.search).get('return');
+      if (returnPath && returnPath.startsWith('/') && !returnPath.startsWith('//')) { window.location.href = returnPath; }
+    }
+
+    toggleToHash.addEventListener('click', function() {
+      pbForm.style.display = 'none';
+      hashForm.style.display = 'block';
+      toggleToHash.style.display = 'none';
+      toggleToPb.style.display = 'inline';
+      err.textContent = '';
+      hashInput.focus();
+    });
+
+    toggleToPb.addEventListener('click', function() {
+      hashForm.style.display = 'none';
+      pbForm.style.display = 'block';
+      toggleToPb.style.display = 'none';
+      toggleToHash.style.display = 'inline';
+      err.textContent = '';
+      emailInput.focus();
+    });
+
+    async function attemptPb() {
+      var email = emailInput.value.trim();
+      var password = passwordInput.value;
+      if (!email || !password) return;
+      pbBtn.disabled = true;
+      try {
+        var res = await fetch('https://chportfolio.us/pb/api/collections/users/auth-with-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ identity: email, password: password })
+        });
+        if (res.ok) {
+          var data = await res.json();
+          localStorage.setItem('pocketbase_auth', JSON.stringify({ token: data.token, record: data.record }));
+          redirect();
+        } else {
+          shake('Incorrect email or password');
+          passwordInput.value = '';
+          passwordInput.focus();
+        }
+      } catch(e) {
+        shake('Network error — try again');
+      }
+      pbBtn.disabled = false;
+    }
+
+    async function attemptHash() {
+      var val = hashInput.value;
       if (!val) return;
       var hash = await sha256(val);
       if (hash === HASH) {
         localStorage.setItem(KEY, JSON.stringify({ hash: hash, timestamp: Date.now() }));
-        overlay.remove();
-        var returnPath = new URLSearchParams(window.location.search).get('return');
-        if (returnPath && returnPath.startsWith('/') && !returnPath.startsWith('//')) { window.location.href = returnPath; return; }
+        redirect();
       } else {
-        err.textContent = 'Incorrect password';
-        card.classList.remove('auth-shake');
-        void card.offsetWidth;
-        card.classList.add('auth-shake');
-        input.value = '';
-        input.focus();
+        shake('Incorrect access code');
+        hashInput.value = '';
+        hashInput.focus();
       }
     }
 
-    btn.addEventListener('click', attempt);
-    input.addEventListener('keydown', function(e) { if (e.key === 'Enter') attempt(); });
+    pbBtn.addEventListener('click', attemptPb);
+    passwordInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') attemptPb(); });
+    emailInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') { passwordInput.focus(); } });
+
+    hashBtn.addEventListener('click', attemptHash);
+    hashInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') attemptHash(); });
   })();
   </script>
 </body>
