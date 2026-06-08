@@ -546,6 +546,24 @@
       margin-top: 64px;
     }
 
+    /* ── Advanced / collapsible bash detail ── */
+    details.advanced { margin: 10px 0 0; }
+    details.advanced summary {
+      font-size: 0.78rem;
+      color: var(--muted);
+      cursor: pointer;
+      user-select: none;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    details.advanced summary::-webkit-details-marker { display: none; }
+    details.advanced summary::before { content: '›'; font-size: 1rem; transition: transform 0.15s; }
+    details[open].advanced summary::before { transform: rotate(90deg); }
+    details.advanced summary:hover { color: var(--text); }
+    details.advanced .code-block { margin-top: 8px; }
+
     /* ── Responsive ── */
     @media (max-width: 900px) {
       .sidebar {
@@ -801,17 +819,28 @@
           <div class="step-num">3</div>
           <div class="step-body">
             <div class="step-title">Install Caveman first — token savings from session 1</div>
-            <div class="step-desc">Caveman is a plugin. <a href="files/install-skills.sh" download>install-skills.sh</a> registers it automatically — run with no args or pass <code>caveman</code> specifically. It detects if already installed and reports where. See <a href="#skills">Caveman Suite</a> for the full command set.</div>
-            <div class="code-block shell">bash install-skills.sh caveman</div>
+            <div class="btn-row" style="margin-bottom: 10px;">
+              <a href="files/install-skills.sh" download class="btn btn-primary">↓ Download install-skills.sh</a>
+            </div>
+            <div class="step-desc">Drop the file anywhere and tell Claude Code: <strong>"run install-skills.sh caveman"</strong> — or run it yourself in a terminal. Detects if already installed. See <a href="#skills">Caveman Suite</a> for the full command set.</div>
+            <details class="advanced">
+              <summary>Terminal command</summary>
+              <div class="code-block shell">bash install-skills.sh caveman</div>
+            </details>
           </div>
         </div>
         <div class="step">
           <div class="step-num">4</div>
           <div class="step-body">
             <div class="step-title">Install hub skills</div>
-            <div class="step-desc">Download <a href="files/install-skills.sh" download>install-skills.sh</a> — a self-contained script with all hub skills embedded. Run it directly, or paste into Claude Code and say "run this." No repo clone needed.</div>
-            <div class="code-block shell">bash install-skills.sh</div>
-            <div class="step-desc">Or install individually — see the full <a href="#skills">Skills section</a> for what's available and manual install commands.</div>
+            <div class="btn-row" style="margin-bottom: 10px;">
+              <a href="files/install-skills.sh" download class="btn btn-primary">↓ Download install-skills.sh</a>
+            </div>
+            <div class="step-desc">Self-contained — all hub skills embedded, no repo clone needed. Drop it anywhere and tell Claude Code: <strong>"run install-skills.sh"</strong>. See <a href="#skills">Skills section</a> for what gets installed.</div>
+            <details class="advanced">
+              <summary>Terminal command</summary>
+              <div class="code-block shell">bash install-skills.sh</div>
+            </details>
           </div>
         </div>
         <div class="step">
@@ -866,9 +895,9 @@
       <div class="cards-grid">
 
         <div class="card">
-          <div class="card-badge">Interactive</div>
+          <div class="card-badge">Start here</div>
           <div class="card-title">First Session Guide</div>
-          <div class="card-desc">Paste into your first Claude Code session. Claude asks questions, then creates your global rules, installs skills, and sets up your project config.</div>
+          <div class="card-desc">Download, then paste into Claude Code and say <strong>"read this and follow it"</strong>. Claude asks questions, creates your global rules, installs skills, and sets up your project.</div>
           <div class="btn-row">
             <a href="files/FIRST-SESSION.md" download class="btn btn-primary">↓ Download prompt</a>
           </div>
@@ -904,14 +933,19 @@
       <p class="section-lead">Skills extend Claude Code with slash commands. Install once globally, active in every project and session.</p>
 
       <div class="callout">
-        <div class="callout-label">Global Install</div>
-        <p>Skills install into <code>~/.claude/</code> — run once from anywhere, active in all projects. The <code>-a claude-code</code> flag targets Claude Code. <code>-y</code> skips confirmation.</p>
-        <div class="code-block shell">npx skills add &lt;path-to-skill-directory&gt; -a claude-code -y</div>
-        <p><strong>Where to get skill files:</strong> download <a href="files/install-skills.sh" download>install-skills.sh</a> — a self-contained script with all 4 generic hub skills embedded. Run it directly or paste into Claude Code and say "run this." No repo clone required.</p>
-        <div class="code-block shell">bash install-skills.sh                       # all 4 skills
+        <div class="callout-label">Install</div>
+        <p>All 4 hub skills are packed into one self-contained script. Download it and tell Claude Code: <strong>"run install-skills.sh"</strong> — or run it yourself.</p>
+        <div class="btn-row" style="margin: 10px 0 12px;">
+          <a href="files/install-skills.sh" download class="btn btn-primary">↓ Download install-skills.sh</a>
+        </div>
+        <p>Or write your own (see <a href="#write-skill">Write Your Own Skill</a>). The <a href="#setup">First Session Guide</a> also walks you through installation interactively.</p>
+        <details class="advanced">
+          <summary>Terminal commands</summary>
+          <div class="code-block shell">bash install-skills.sh                       # all 4 skills
 bash install-skills.sh cavecrew ship-review  # specific skills</div>
-        <p>Or write your own (see <a href="#write-skill">Write Your Own Skill</a>). The <a href="#setup">First Session Guide</a> also walks you through sourcing and installing skills interactively.</p>
-        <p class="note">Common failure: the directory must contain a <code>SKILL.md</code> file with valid <code>name:</code> and <code>description:</code> frontmatter. Missing file or malformed frontmatter = silent failure.</p>
+          <div class="code-block shell">npx skills add &lt;path-to-skill-directory&gt; -a claude-code -y</div>
+        </details>
+        <p class="note" style="margin-top: 10px;">Common failure: skill directory must contain <code>SKILL.md</code> with valid <code>name:</code> and <code>description:</code> frontmatter. Missing file = silent failure.</p>
       </div>
 
       <div class="skills-grid">
