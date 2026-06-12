@@ -9,12 +9,12 @@ Reference for Claude Code sessions. Use the simplest level that works. Higher = 
 | Level | Use when | Tools |
 |-------|----------|-------|
 | 1. Main thread | Single known-path read, quick answer, coordinating subagents | inline |
-| 2. Skills | Repeatable workflows, slash commands | `/caveman`, `/ship-review`, `/prompt-engineer` |
-| 3. Cavecrew | Locate code, 1-2 file edits, diff review | `cavecrew-investigator`, `cavecrew-builder`, `cavecrew-reviewer` |
+| 2. Skills | Repeatable workflows, slash commands | `/ship-review`, `/prompt-engineer` |
+| 3. Subagents | Locate code, 1-2 file edits, diff review | native `investigator`, `reviewer`, `security-reviewer` (cavecrew plugin as fallback) |
 | 4. Worktree agents | 3+ file edits, new features, cross-cutting refactors | `general-purpose` (worktree isolation) |
 | 5. Dynamic workflows | 5+ independent parallel tasks, each discrete | `/workflows` |
 
-**Rule:** Default to level 3 (cavecrew) for any task touching >1 file. Only go higher when scope demands it.
+**Rule:** Default to level 3 (subagent) for any task touching >1 file. Only go higher when scope demands it.
 
 ---
 
@@ -29,6 +29,8 @@ Claude Code supports reusable subagent blueprints stored as `.claude/agents/<nam
 | Tool restriction | No | Yes — per-agent allowlist |
 | Model control | No | Yes — route cheap tasks to Haiku |
 | Context impact | Floods main thread | Output stays isolated |
+
+Native agent definitions are the recommended primary delegation system. They combine model routing (cheap models for searches) with compressed output instructions in the agent body — you get both cost routing and small tool-result payloads. Slash-command agent skills remain useful as a fallback where no native definition exists.
 
 ### How to define an agent
 
@@ -69,18 +71,19 @@ Place global agents in `.claude/agents/`. Place project-specific agents in `<Pro
 
 ## Level Decision Triggers
 
-**→ cavecrew-investigator** (never inline grep):
+**→ investigator** (native; cavecrew-investigator as fallback — never inline grep):
 - "where is X defined / what calls Y / list uses of Z"
 - any search touching more than one file
 - context is already mid-session or heavy
 
-**→ cavecrew-builder** (never inline edit when scope is clear):
+**→ builder agent** (cavecrew-builder — never inline edit when scope is clear):
 - ≤2 files, exact path already known
 - mechanical change: rename, config tweak, single function rewrite
 
-**→ cavecrew-reviewer** (never inline review):
+**→ reviewer / security-reviewer** (native; cavecrew-reviewer as fallback — never inline review):
 - reviewing any diff before ship
 - auditing a file for bugs or issues
+- security-reviewer specifically before shipping auth or input-handling changes
 
 **→ general-purpose worktree** (not cavecrew):
 - 3+ files
@@ -225,6 +228,16 @@ Every worktree agent must end with a **Shipping Status block** — main thread r
 ```
 
 **Deploy ownership:** agents commit + push only. Main thread runs `./publish.sh` — never the agent. Agents deploying independently bypass the ship-review gate and can cause double-deploys.
+
+### Long-running agent tasks — spec-file pattern
+
+Subagents have no checkpoint/resume — if one dies at a session limit mid-task, all in-context work is lost. Pattern:
+
+1. Write the full task spec to a file on disk before launching.
+2. Instruct the agent to read the spec and checkpoint progress (files changed, step reached) to disk as it works.
+3. On death, relaunch a fresh agent pointing at the same spec — it resumes from the checkpoint, zero loss.
+
+**Background permission gotcha:** background subagents auto-deny any permission prompt — they fail silently on un-allowlisted network/write calls. Run permission-needing agents in the foreground, or pre-grant the needed tools in the project settings allowlist before launching in background.
 
 ---
 
