@@ -593,6 +593,7 @@
       overlay.remove();
       var returnPath = new URLSearchParams(window.location.search).get('return');
       if (returnPath && returnPath.startsWith('/') && !returnPath.startsWith('//')) { window.location.href = returnPath; }
+      else { window.location.href = '/dashboard/'; }
     }
 
     toggleToHash.addEventListener('click', function() {
