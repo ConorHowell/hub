@@ -48,24 +48,31 @@ model: claude-haiku-4-5-20251001
 Agent system prompt goes here.
 ```
 
-### Model routing guide
+### Model + effort routing guide
 
-| Task type | Model |
-|-----------|-------|
-| Search, grep, read-only investigation | `claude-haiku-4-5-20251001` |
-| Code review, implementation, reasoning | `claude-sonnet-4-6` |
-| Security review, architecture, complex synthesis | `claude-sonnet-4-6` |
+Route both the model AND the effort level. Effort affects all tokens incl tool-call count — set it per agent in frontmatter (`effort: low|medium|high`), which overrides the session level while that agent runs. Keep the main thread at `high`; spend less only at the edges.
+
+| Task type | Model | Effort |
+|-----------|-------|--------|
+| Search, grep, read-only investigation | `claude-haiku-4-5-20251001` | low |
+| Code review, implementation, reasoning | `claude-sonnet-4-6` | medium |
+| Security review, architecture, complex synthesis | `claude-sonnet-4-6` | high |
+
+Rule of thumb: pure locate/search = low; scoped build or diff review = medium; vuln-finding, architecture, anything where a miss is expensive = high. Never set a security reviewer to low.
 
 ### Recommended agent types
 
-| Agent | Scope | Tools | Model |
-|-------|-------|-------|-------|
-| `investigator` | Read-only code location | Read, Grep, Bash | Haiku |
-| `reviewer` | Adversarial diff review | Read, Grep, Bash | Sonnet |
-| `security-reviewer` | OWASP / auth / access control | Read, Grep, Bash | Sonnet |
-| `<project>-specialist` | Project-specific context + build | Read, Edit, Write, Bash, Grep | Sonnet |
+| Agent | Scope | Tools | Model | Effort |
+|-------|-------|-------|-------|--------|
+| `investigator` | Read-only code location | Read, Grep, Bash | Haiku | low |
+| `reviewer` | Adversarial diff review | Read, Grep, Bash | Sonnet | medium |
+| `security-reviewer` | OWASP / auth / access control | Read, Grep, Bash | Sonnet | high |
+| `<project>-specialist` | Project-specific context + build | Read, Edit, Write, Bash, Grep | Sonnet | medium |
 
 Place global agents in `.claude/agents/`. Place project-specific agents in `<ProjectDir>/.claude/agents/`.
+
+### Main-thread defaults
+`effortLevel: high` + `model: opusplan` (Opus plans, Sonnet executes). Lowering main-thread effort to "save tokens" backfires: at low/medium the model scopes to the literal ask → shallow first pass → rework → higher total spend. Use `ultrathink` in a prompt for a one-off deep turn without raising the session level.
 
 ---
 

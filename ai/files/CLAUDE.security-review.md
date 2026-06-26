@@ -10,8 +10,8 @@ path:line: 🔴 critical | 🟠 high | 🟡 medium | 🔵 low: problem. fix.
 
 Example:
 ```
-Neon Odyssey/character-creator.html:1365: 🟠 high: esc() missing single-quote escape allows attribute injection. Add .replace(/'/g,'&#39;') to esc().
-Hub/ai/index.html:420: 🔴 critical: server IP hardcoded in deployed JS constant. Redact to placeholder.
+src/app.js:42: 🟠 high: esc() missing single-quote escape allows attribute injection. Add .replace(/'/g,'&#39;') to esc().
+public/index.html:10: 🔴 critical: server IP hardcoded in deployed JS constant. Redact to placeholder.
 ```
 
 ---
