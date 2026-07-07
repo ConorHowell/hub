@@ -583,6 +583,16 @@
 
     <footer class="console-footer">CONOR HOWELL · PERSONAL TOOLS</footer>
   </div>
+  <script>
+    // Modal open/close — plain script so it works even if the PB module import fails
+    const _userBtn   = document.getElementById('user-btn')
+    const _modal     = document.getElementById('auth-modal')
+    const _closeBtn  = document.getElementById('auth-close')
+    const _overlayBg = document.getElementById('auth-overlay-bg')
+    _userBtn.addEventListener('click', () => { _modal.hidden = false; const e = document.getElementById('auth-error'); if (e) e.textContent = '' })
+    _closeBtn.addEventListener('click', () => { _modal.hidden = true })
+    _overlayBg.addEventListener('click', () => { _modal.hidden = true })
+  </script>
   <script type="module">
     import PocketBase from 'https://esm.sh/pocketbase'
 
@@ -591,8 +601,6 @@
     const userBtn    = document.getElementById('user-btn')
     const userDot    = userBtn.querySelector('.user-dot')
     const modal      = document.getElementById('auth-modal')
-    const closeBtn   = document.getElementById('auth-close')
-    const overlayBg  = document.getElementById('auth-overlay-bg')
     const loggedInEl = document.getElementById('auth-logged-in')
     const loginFormEl= document.getElementById('auth-login-form')
     const emailLabel = document.getElementById('auth-user-email')
@@ -615,10 +623,6 @@
       pb.collection('users').authRefresh().catch(() => { pb.authStore.clear(); updateUI() })
     }
     updateUI()
-
-    userBtn.addEventListener('click', () => { modal.hidden = false; errorEl.textContent = '' })
-    closeBtn.addEventListener('click', () => { modal.hidden = true })
-    overlayBg.addEventListener('click', () => { modal.hidden = true })
 
     logoutBtn.addEventListener('click', () => {
       pb.authStore.clear()
