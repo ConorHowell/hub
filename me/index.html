@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://esm.sh; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://chportfolio.us; connect-src 'self' https://chportfolio.us; base-uri 'self'; object-src 'none'; frame-ancestors 'none';">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Private Hub</title>
   <style>
@@ -529,8 +530,9 @@
         dropdown = document.createElement('div');
         dropdown.id = 'profile-dropdown';
         dropdown.innerHTML =
-          '<div style="font-size:0.72rem;color:var(--muted);margin-bottom:10px;word-break:break-all">' + getLabel() + '</div>' +
+          '<div class="pd-label" style="font-size:0.72rem;color:var(--muted);margin-bottom:10px;word-break:break-all"></div>' +
           '<button id="signout-btn" style="width:100%;background:rgba(240,168,48,0.1);border:1px solid rgba(240,168,48,0.25);border-radius:6px;color:var(--amber);padding:8px;font-size:0.8rem;font-weight:700;cursor:pointer;font-family:inherit">Sign out</button>';
+        dropdown.querySelector('.pd-label').textContent = getLabel();
         document.body.appendChild(dropdown);
         dropdown.querySelector('#signout-btn').addEventListener('click', function() {
           localStorage.removeItem('priv_hub_auth');
