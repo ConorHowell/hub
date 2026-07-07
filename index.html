@@ -464,37 +464,37 @@
   </style>
 </head>
 <body>
-  <div class="wrapper">
+  <!-- Floating user button — outside .wrapper to avoid stacking context -->
+  <button id="user-btn" class="user-btn" aria-label="Sign in" title="Account">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+      <circle cx="12" cy="7" r="4"/>
+    </svg>
+    <span class="user-dot" hidden></span>
+  </button>
 
-    <!-- Floating user button -->
-    <button id="user-btn" class="user-btn" aria-label="Sign in" title="Account">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-        <circle cx="12" cy="7" r="4"/>
-      </svg>
-      <span class="user-dot" hidden></span>
-    </button>
-
-    <!-- Auth modal -->
-    <div id="auth-modal" class="auth-modal" hidden aria-modal="true" role="dialog" aria-label="Sign in">
-      <div class="auth-overlay-bg" id="auth-overlay-bg"></div>
-      <div class="auth-card">
-        <div class="auth-header">
-          <div class="auth-title">ACCOUNT</div>
-          <button class="auth-close" id="auth-close" aria-label="Close">✕</button>
-        </div>
-        <div id="auth-logged-in" hidden>
-          <div class="auth-user-email" id="auth-user-email"></div>
-          <button class="auth-logout-btn" id="auth-logout-btn">Sign out</button>
-        </div>
-        <div id="auth-login-form">
-          <input type="email" id="auth-email" class="auth-input" placeholder="Email" autocomplete="email">
-          <input type="password" id="auth-password" class="auth-input" placeholder="Password" autocomplete="current-password">
-          <button class="auth-submit-btn" id="auth-submit-btn">SIGN IN →</button>
-          <div class="auth-error" id="auth-error"></div>
-        </div>
+  <!-- Auth modal — outside .wrapper to avoid stacking context -->
+  <div id="auth-modal" class="auth-modal" hidden aria-modal="true" role="dialog" aria-label="Sign in">
+    <div class="auth-overlay-bg" id="auth-overlay-bg"></div>
+    <div class="auth-card">
+      <div class="auth-header">
+        <div class="auth-title">ACCOUNT</div>
+        <button class="auth-close" id="auth-close" aria-label="Close">✕</button>
+      </div>
+      <div id="auth-logged-in" hidden>
+        <div class="auth-user-email" id="auth-user-email"></div>
+        <button class="auth-logout-btn" id="auth-logout-btn">Sign out</button>
+      </div>
+      <div id="auth-login-form">
+        <input type="email" id="auth-email" class="auth-input" placeholder="Email" autocomplete="email">
+        <input type="password" id="auth-password" class="auth-input" placeholder="Password" autocomplete="current-password">
+        <button class="auth-submit-btn" id="auth-submit-btn">SIGN IN →</button>
+        <div class="auth-error" id="auth-error"></div>
       </div>
     </div>
+  </div>
+
+  <div class="wrapper">
 
     <header class="console-header">
       <div class="header-top">
@@ -521,14 +521,14 @@
         <div class="panel-title">NEON ODYSSEY</div>
         <div class="panel-sub">Legends of Avantris</div>
         <div class="panel-tools">
-          <a class="tool-link" href="https://chportfolio.us/neon/character-creator.html">
+          <a class="tool-link" target="_blank" rel="noopener noreferrer" href="https://chportfolio.us/neon/character-creator.html">
             <span class="link-arrow">›</span>
             <div class="link-info">
               <div class="link-name">Character Creator</div>
               <div class="link-desc">Build your operative — class, species, background, ability scores, printable sheet.</div>
             </div>
           </a>
-          <a class="tool-link" href="https://chportfolio.us/neon/class-reference.html">
+          <a class="tool-link" target="_blank" rel="noopener noreferrer" href="https://chportfolio.us/neon/class-reference.html">
             <span class="link-arrow">›</span>
             <div class="link-info">
               <div class="link-name">Class Reference</div>
@@ -549,7 +549,7 @@
         <div class="panel-title">CHAMPIONS</div>
         <div class="panel-sub">Pokémon VGC Helper</div>
         <div class="panel-tools">
-          <a class="tool-link" href="https://chportfolio.us/champ/">
+          <a class="tool-link" target="_blank" rel="noopener noreferrer" href="https://chportfolio.us/champ/">
             <span class="link-arrow">›</span>
             <div class="link-info">
               <div class="link-name">VGC Coach</div>
@@ -570,7 +570,7 @@
         <div class="panel-title">MORROWIND</div>
         <div class="panel-sub">Quest Helper</div>
         <div class="panel-tools">
-          <a class="tool-link" href="https://chportfolio.us/morrowind/MorrowindQuestHelper.html">
+          <a class="tool-link" target="_blank" rel="noopener noreferrer" href="https://chportfolio.us/morrowind/MorrowindQuestHelper.html">
             <span class="link-arrow">›</span>
             <div class="link-info">
               <div class="link-name">Quest Tracker</div>
