@@ -114,6 +114,25 @@
       border-right-color: #7c3aed;
     }
 
+    /* Link to the sibling page. Visually separated from the in-page anchors above,
+       because it navigates away — the old version looked like another section. */
+    .nav-cross {
+      display: block;
+      margin: 20px 20px 0;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      font-size: 0.83rem;
+      color: rgba(255,255,255,0.62);
+      text-decoration: none;
+    }
+    .nav-cross:hover { color: #fff; text-decoration: none; }
+    .nav-cross span {
+      display: block;
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.3);
+      margin-top: 2px;
+    }
+
     /* ── Main ── */
     .main {
       margin-left: var(--sidebar-w);
@@ -721,9 +740,10 @@
       <div class="nav-group">
         <div class="nav-group-label">Reference</div>
         <a href="#templates" class="nav-link">Templates</a>
-        <a href="#workflow" class="nav-link">One Operator's Workflow</a>
         <a href="#files" class="nav-link">All Files</a>
       </div>
+
+      <a href="workflow/" class="nav-cross">Operator runbook →<span>one setup, not a standard</span></a>
     </div>
   </nav>
 
