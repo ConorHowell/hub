@@ -541,6 +541,19 @@
       <h2 class="section-title">Worktree agent choreography</h2>
       <p class="section-lead">The full sequence I run around a worktree agent, start to merge.</p>
 
+      <div class="aside">
+        <p><strong>First: check whether this wants an agent at all.</strong> Anthropic's own position is
+        that "most coding tasks involve fewer truly parallelizable tasks than research", and that agents
+        "are not yet great at coordinating and delegating to other agents in real time". A multi-agent
+        run costs roughly <strong>15× the tokens</strong> of ordinary chat, and the widely-quoted 90.2%
+        improvement came from a <em>research</em> evaluation, not a coding one.</p>
+        <p>So the default here is <strong>one well-scoped session, with subagents for verbose reads</strong>
+        — a subagent's output stays in its own context, which is a real saving. Parallel agents earn their
+        cost on research, review, and chasing competing hypotheses during a debug. They do not reliably
+        earn it on coding throughput. Two agents whose scopes touch the same file is not parallelism;
+        it is a lost-update bug with extra steps.</p>
+      </div>
+
       <div class="steps">
         <div class="step">
           <div class="step-num">1</div>

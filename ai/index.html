@@ -728,6 +728,7 @@
         <a href="#write-skill" class="nav-link">Write Your Own Skill</a>
         <a href="#subagents" class="nav-link">6 · Subagents</a>
         <a href="#hooks" class="nav-link">7 · Hooks</a>
+        <a href="#output-styles" class="nav-link">Output Styles</a>
         <a href="#mcp-plugins" class="nav-link">8 · MCP &amp; Plugins</a>
       </div>
 
@@ -1278,8 +1279,43 @@ Then: path:line: severity: problem. fix.</div>
     ]
   }
 }</div>
-      <p>Useful events include <code>SessionStart</code>, <code>UserPromptSubmit</code>, <code>PreToolUse</code>, <code>PostToolUse</code>, <code>PreCompact</code>, <code>SubagentStop</code>, <code>Stop</code>, and <code>SessionEnd</code>. A hook communicates back by printing JSON to stdout, or by exit code: <strong>0</strong> succeeds and its stdout is parsed as JSON; <strong>2</strong> is a blocking error and stderr becomes the reason; any other code is a non-blocking error.</p>
-      <p>The field that matters most is <code>hookSpecificOutput.additionalContext</code> — text injected into Claude's context. <code>systemMessage</code>, by contrast, is shown to <em>you</em> and is not reliable as instruction to the model. If you want the model to act on it, use <code>additionalContext</code>.</p>
+      <p>Useful events include <code>SessionStart</code>, <code>UserPromptSubmit</code>, <code>PreToolUse</code>, <code>PostToolUse</code>, <code>SubagentStop</code>, <code>Stop</code>, and <code>SessionEnd</code>.</p>
+
+      <h3>How a hook talks back</h3>
+      <p>Two channels, and the docs are explicit that you pick one per hook rather than mixing them: an <strong>exit code</strong>, or <strong>JSON on stdout</strong>.</p>
+      <div class="table-wrap">
+      <table class="files-table">
+        <thead><tr><th>Exit</th><th>Meaning</th><th>What happens to stdout</th></tr></thead>
+        <tbody>
+          <tr><td><code>0</code></td><td>Success</td><td>Parsed as JSON if it is JSON</td></tr>
+          <tr><td><code>2</code></td><td>Blocking error</td><td><strong>Discarded.</strong> stderr becomes the reason</td></tr>
+          <tr><td>other</td><td>Non-blocking error</td><td>Ignored; the session continues</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p>Two consequences catch people out. <strong>Exit 1 does not block anything</strong> — a guard that fails with <code>exit 1</code> lets the tool run. And if you want to return a structured decision, you must <strong>exit 0</strong>: on exit 2 your carefully written JSON is thrown away. The one exception is <code>WorktreeCreate</code>, where <em>any</em> non-zero exit aborts the worktree.</p>
+
+      <h3>The field that matters — and how it silently fails</h3>
+      <p>Injecting text into Claude's context is done with <code>additionalContext</code>, and it <strong>must be nested inside <code>hookSpecificOutput</code> alongside a matching <code>hookEventName</code></strong>:</p>
+      <div class="code-block">// Works
+{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"..."}}
+
+// Silently ignored — no error, no warning, hook reports success
+{"additionalContext":"..."}</div>
+
+      <div class="callout warn">
+        <div class="callout-label">This is the most expensive mistake in this section</div>
+        <p>A hook with the wrong output shape <strong>reports success and does nothing</strong>. Malformed JSON is discarded the same way. You will see a green hook and no injected text, and nothing will tell you the difference. We shipped this exact bug in two hooks and did not notice for weeks.</p>
+        <p><strong>Not every event accepts <code>additionalContext</code>.</strong> Writing one event's shape by analogy from another is how the bug happens — check the event before you write the hook, and verify by running it: <code>echo '{}' | ./your-hook.sh | jq -e .hookSpecificOutput.additionalContext</code>. If that command fails, so does your hook.</p>
+      </div>
+
+      <p><code>systemMessage</code>, by contrast, is shown to <em>you</em> and is not reliable as instruction to the model. If you want the model to act on it, use <code>additionalContext</code>.</p>
+      <p>Build the JSON with <code>jq -Rs</code> rather than <code>printf</code>. Any quote, newline or backslash in the text you are injecting — a filename, a git log, an error message — will otherwise produce invalid JSON that is dropped without complaint.</p>
+
+      <div class="callout warn">
+        <div class="callout-label">The <code>if:</code> filter fails open</div>
+        <p>Hooks can carry an <code>if:</code> condition to skip cheap cases. When the condition cannot be evaluated — an unparseable command, an unexpected payload — <strong>the hook is skipped, not run</strong>. For a guard, "skipped" means "allowed". Do the matching inside the script, where you control what happens when parsing fails.</p>
+      </div>
 
       <h3>Template — SessionStart context injection</h3>
       <p>Reads a project state file, if one exists, and injects it so every session starts knowing where the last one stopped. Silent when there is nothing to say.</p>
@@ -1338,10 +1374,27 @@ check 'chmod[[:space:]]+777'                                    'chmod 777'
 check 'DROP[[:space:]]+TABLE'                                   'DROP TABLE'
 exit 0</div>
 
-      <h3>Template — PreCompact preserve list</h3>
-      <p>Runs immediately before a compaction and tells the summariser what must survive. A one-liner, no script file needed.</p>
-      <div class="code-block">printf '{"hookSpecificOutput":{"hookEventName":"PreCompact","additionalContext":"PRESERVE DURING COMPACTION: (1) the current task and which step it is on, (2) every file changed this session, (3) any uncommitted changes, (4) the next action to take."}}'</div>
-      <p class="step-note">Use <code>additionalContext</code> here, not <code>systemMessage</code> — a <code>systemMessage</code> is displayed to you and does not reach the summariser.</p>
+      <h3>Template — surviving a compaction</h3>
+      <p>Compaction replaces the conversation with a summary, and working state is what goes missing: which files you touched, what is uncommitted, which branch you are on.</p>
+
+      <div class="callout warn">
+        <div class="callout-label">An earlier version of this page had this wrong</div>
+        <p>We recommended a <code>PreCompact</code> hook that injected a "preserve this" list. <strong>It never worked.</strong> <code>PreCompact</code> accepts no <code>additionalContext</code> in any form, so the payload was rejected on every compaction — silently, exactly as described above. It surfaced only when a <code>/compact</code> run finally printed the validation error. If you copied that snippet, it has been doing nothing.</p>
+      </div>
+
+      <p>Use <code>SessionStart</code> with the <code>compact</code> matcher instead. It fires just <em>after</em> a compaction, and it does support <code>additionalContext</code>. Firing afterwards is also the better design: rather than asking a summariser to remember state, you read the state live at the moment the fresh context needs it.</p>
+      <div class="code-block">#!/bin/bash
+# SessionStart, matcher: "compact". Facts, not instructions —
+# the model does not need telling what to do with its own git status.
+cd "${CLAUDE_PROJECT_DIR:-$PWD}" 2>/dev/null || exit 0
+
+{
+  printf 'Working state after compaction (read live from git):\n'
+  printf 'branch: %s\n' "$(git rev-parse --abbrev-ref HEAD 2>/dev/null)"
+  printf 'uncommitted:\n%s\n' "$(git status --porcelain 2>/dev/null | head -40)"
+  printf 'recent commits:\n%s\n' "$(git log --oneline -5 2>/dev/null)"
+} | jq -Rs '{hookSpecificOutput:{hookEventName:"SessionStart",additionalContext:.}}'</div>
+      <p class="step-note"><code>jq -Rs</code> does the JSON encoding. Git output contains quotes and newlines; hand-built <code>printf</code> JSON breaks on the first filename with an apostrophe in it, and breaks silently.</p>
 
       <div class="callout warn">
         <div class="callout-label">Hooks run with your privileges</div>
@@ -1349,6 +1402,51 @@ exit 0</div>
       </div>
 
       <p>Hooks are also a direct token saving: a <code>PostToolUse</code> hook that greps a test run for failures turns tens of thousands of tokens of output into a few hundred before Claude ever sees them.</p>
+    </section>
+
+    <!-- OUTPUT STYLES -->
+    <section class="doc-section" id="output-styles">
+      <h2 class="section-title">Output Styles</h2>
+      <p class="section-lead">Output styles "change how Claude responds, not what Claude knows" — they modify the <em>system prompt</em> to set role, tone and output format. Most people put this kind of instruction in <code>CLAUDE.md</code>, which is a weaker layer for the job.</p>
+
+      <h3>Four built-ins</h3>
+      <div class="table-wrap">
+      <table class="files-table">
+        <thead><tr><th>Style</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Default</strong></td><td>Standard Claude Code behaviour.</td></tr>
+          <tr><td><strong>Proactive</strong></td><td>Claude executes immediately and makes reasonable assumptions instead of pausing for routine decisions. Stronger autonomous-execution guidance than auto mode applies — <em>and it works without changing your permission mode</em>.</td></tr>
+          <tr><td><strong>Explanatory</strong></td><td>Explains its reasoning as it works.</td></tr>
+          <tr><td><strong>Learning</strong></td><td>Teaching mode — leaves you work to do rather than doing everything.</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p><strong>Proactive</strong> is the one worth knowing about. If Claude keeps stopping to ask about decisions you do not care about, this is the correct fix — not loosening permissions, which changes what it is allowed to do rather than how much it deliberates.</p>
+
+      <h3>Which layer to use</h3>
+      <p>These are not alternatives. They stack, and they differ in where the text lands:</p>
+      <div class="table-wrap">
+      <table class="files-table">
+        <thead><tr><th>Feature</th><th>How it works</th></tr></thead>
+        <tbody>
+          <tr><td>Output styles</td><td>Modifies the system prompt</td></tr>
+          <tr><td><code>CLAUDE.md</code></td><td>Adds a <em>user message</em> after the system prompt</td></tr>
+          <tr><td><code>--append-system-prompt</code></td><td>Appends to the system prompt without removing anything</td></tr>
+          <tr><td>Agents</td><td>Runs a subagent with its own system prompt, model and tools</td></tr>
+          <tr><td>Skills</td><td>Loads task-specific instructions when invoked or relevant</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p>One more difference decides most cases: <strong>all output styles trigger reminders to adhere to the style throughout the conversation.</strong> <code>CLAUDE.md</code> gets no such per-turn reminder. If you have written tone or format rules into <code>CLAUDE.md</code> and watched them decay over a long session, that is the mechanism — and an output style is the fix.</p>
+
+      <div class="callout warn">
+        <div class="callout-label"><code>keep-coding-instructions</code> defaults to <code>false</code></div>
+        <p>"Custom output styles leave out Claude Code's built-in software engineering instructions, such as how to scope changes, write comments, and verify work, unless <code>keep-coding-instructions</code> is set to <code>true</code>."</p>
+        <p>Write a custom style to adjust your tone, and you silently delete Claude's engineering behaviour along with it. The output will read exactly as you asked; the scoping and verification discipline just quietly stops. Set the flag unless you genuinely want a non-coding assistant.</p>
+      </div>
+
+      <p>Set one via <code>/config</code> → Output style, or the <code>outputStyle</code> setting. The standalone <code>/output-style</code> command was <strong>deprecated in v2.1.73 and removed in v2.1.91</strong> — if a tutorial tells you to run it, that tutorial predates the change.</p>
+      <p>Two caveats. The style is <strong>fixed at session start</strong>: changing it mid-session does not invalidate your cache, but it also does not apply. And styles affect the <strong>main conversation only</strong> — subagents run their own system prompt regardless.</p>
     </section>
 
     <!-- 8 · MCP & PLUGINS -->
@@ -1367,11 +1465,32 @@ exit 0</div>
 /plugin install &lt;name&gt;@&lt;marketplace&gt;
 /plugin list</div>
 
+      <p>There are two Anthropic marketplaces. <strong>Official</strong> carries <strong>275 plugins</strong> and is available at launch; <strong>community</strong> carries <strong>2,277</strong>, every entry pinned to a commit SHA. Official is curated but <em>not Anthropic-authored</em> — the authors include Google, SAP, AWS, Grafana and Shopify.</p>
+      <p>Each has two different names, which is worth pinning down before you type one:</p>
+      <div class="table-wrap">
+      <table class="files-table">
+        <thead><tr><th>Marketplace</th><th>Name you install with</th><th>GitHub repo</th></tr></thead>
+        <tbody>
+          <tr><td>Official</td><td><code>claude-plugins-official</code></td><td><code>anthropics/claude-plugins-official</code></td></tr>
+          <tr><td>Community</td><td><code>claude-community</code></td><td><code>anthropics/claude-plugins-community</code></td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p class="step-note">The community marketplace ID is <strong>not</strong> its repo slug — <code>/plugin install foo@claude-plugins-community</code> will not resolve. Confirm what you actually have with <code>/plugin marketplace list</code>.</p>
+      <p>The community marketplace describes its contents as "plugins that have passed Anthropic's automated validation and safety screening". Read that precisely: <strong>automated screening is not review, and it is not an endorsement.</strong> It means nothing obviously malicious was detected, not that the code is good or that it does what the description says.</p>
+
       <div class="callout warn">
         <div class="callout-label">Trust warning — read this before installing anything</div>
         <p>A plugin's skills, agents and hooks <strong>execute inside your session with your privileges</strong>. A plugin hook can run any command a shell can. A plugin skill can rewrite instructions the model then follows. This is not a sandbox and it is not reviewed by Anthropic.</p>
         <p>Install only from sources you have actually looked at. Enabling a plugin's own MCP server can also invalidate your prompt cache for that conversation, so it is worth doing deliberately rather than while browsing.</p>
       </div>
+
+      <h3>Popularity signals do not exist</h3>
+      <p>There are <strong>no install or usage statistics</strong> anywhere — not in the <code>/plugin</code> panel (which shows only context cost and last-updated), not in the marketplace manifests. The only public number is GitHub stars, and stars measure bookmarking, not use.</p>
+      <p>How badly they mislead, in one comparison: a popular community plugin repo has <strong>262,108 stars</strong>, while the <code>anthropics/claude-plugins-community</code> repo — the catalog every single community install resolves through — has <strong>318</strong>. Same ecosystem, three orders of magnitude apart. Treat any "most popular plugin" listing, including star counts quoted in blog posts, as unsourced.</p>
+
+      <h3>Skills are portable</h3>
+      <p><code>SKILL.md</code> is not a Claude Code file format. It is the <strong>Agent Skills open standard</strong>, and the same file works in other agent tools — Cursor, Copilot, Codex, Gemini CLI. A skill you write here is not a bet on one vendor, which is a genuine reason to prefer writing a skill over encoding the same knowledge in tool-specific config.</p>
     </section>
 
     <!-- 9 · BUILT-IN REVIEW SKILLS -->
