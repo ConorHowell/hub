@@ -1396,6 +1396,41 @@ cd "${CLAUDE_PROJECT_DIR:-$PWD}" 2>/dev/null || exit 0
 } | jq -Rs '{hookSpecificOutput:{hookEventName:"SessionStart",additionalContext:.}}'</div>
       <p class="step-note"><code>jq -Rs</code> does the JSON encoding. Git output contains quotes and newlines; hand-built <code>printf</code> JSON breaks on the first filename with an apostrophe in it, and breaks silently.</p>
 
+      <h3>Knowing whether a hook actually ran</h3>
+      <p>This is the part most hook tutorials skip, and it is the part that matters. A hook that is silent when healthy is <strong>indistinguishable from a hook that was never registered</strong>. Piping test JSON into your script proves the script works; it proves nothing about whether Claude Code is running it.</p>
+      <div class="table-wrap">
+      <table class="files-table">
+        <thead><tr><th>Question</th><th>How to answer it</th></tr></thead>
+        <tbody>
+          <tr><td>Is it registered, and from which settings file?</td><td><code>/hooks</code> — a read-only browser of every event, labelled <code>User</code> / <code>Project</code> / <code>Local</code> / <code>Plugin</code> / <code>Built-in</code></td></tr>
+          <tr><td>Which hooks matched? Exit codes? stdout?</td><td><code>claude --debug-file /tmp/claude.log</code>, then <code>tail -f</code>. Mid-session, run <code>/debug</code></td></tr>
+          <tr><td>What fired this turn?</td><td><code>Ctrl+O</code> transcript view — success is silent, errors show</td></tr>
+          <tr><td>Was my JSON rejected?</td><td>Validation failures go to the <strong>debug log</strong>, not the transcript</td></tr>
+          <tr><td>Configured but never runs</td><td>Check <code>/hooks</code> first. Then: matchers are <strong>case-sensitive</strong>; right event?; <code>chmod +x</code>; absolute path; is <code>jq</code> installed?</td></tr>
+          <tr><td><code>/hooks</code> empty after editing settings</td><td>Restart the session — the file watcher can miss a change. Check for trailing commas</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p><strong>Exit 0 with output is not proof of anything.</strong> The docs are explicit: "For most events, stdout is written to the debug log but not shown in the transcript." The exceptions are <code>UserPromptSubmit</code>, <code>UserPromptExpansion</code> and <code>SessionStart</code>, where stdout becomes context Claude can act on. So a hook printing flawless JSON into a void looks exactly like a working one.</p>
+      <p class="step-note">This is not in tension with the transcript row above. The transcript shows a one-line <em>summary</em> per hook that fired — and only when it errored, since success is silent. Your hook's actual stdout is a different thing, and for most events it is only ever in the debug log.</p>
+      <p>A cheap trick that needs no debug flag: have each hook append one line to a log file recording which branch it took.</p>
+      <div class="code-block">log() { printf '%s my-hook %s\n' "$(date -u +%FT%TZ)" "$1" &gt;&gt; ~/.claude/hooks/.fired.log; }
+
+# ...then at each exit path:
+log "quiet(nothing-to-report)"
+log "BLOCKED(reason)"</div>
+      <p class="step-note">"Did it fire?" becomes <code>tail</code>. Log only the interesting branches on hooks that fire on every tool call, or the file becomes noise.</p>
+
+      <div class="callout warn">
+        <div class="callout-label">A <code>Stop</code> hook that returns <code>additionalContext</code> re-opens the turn</div>
+        <p>It is not an annotation — the conversation <em>continues</em> so the model can act on it. If the condition it complains about is still true next time, it fires again. Claude Code overrides the hook after <strong>8 consecutive blocks</strong> and warns.</p>
+        <p>Guard it by reading <code>stop_hook_active</code> from the hook's JSON input and exiting early when it is <code>true</code>:</p>
+        <div class="code-block">INPUT=$(cat)
+if [ "$(printf '%s' "$INPUT" | jq -r '.stop_hook_active // false')" = "true" ]; then
+  exit 0   # already continuing because of this hook — let the turn end
+fi</div>
+      </div>
+
       <div class="callout warn">
         <div class="callout-label">Hooks run with your privileges</div>
         <p>A hook is arbitrary shell, executed automatically, with whatever access your user has. Use absolute paths, quote your variables, and never interpolate untrusted input into a command string. Hooks that arrive with a plugin are the same risk with less visibility.</p>
