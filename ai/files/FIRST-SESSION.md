@@ -58,7 +58,6 @@ If `MISSING`: create `~/.claude/CLAUDE.md` with this content (adapt for Windows 
 - Write secure code — no command injection, XSS, SQL injection, or OWASP top 10 vulnerabilities.
 
 ## Output Quality
-- Before delivering, challenge your own output: Is this the simplest correct solution? What are the edge cases?
 - Do not summarize what you just did at the end of responses — the user can read the diff.
 - For UI or frontend changes, verify visually before reporting complete.
 

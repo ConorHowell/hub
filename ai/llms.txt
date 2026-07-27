@@ -1,39 +1,43 @@
 # llms.txt
 # AI Hub — Claude Code reference documentation
-# Public resource: skills, templates, and workflow guides for Claude Code users.
+# Publicly readable and reusable. Deliberately not search-indexed (see robots.txt) —
+# that is a choice about crawlers, not a restriction on people or on you.
 
 ## What's here
-- Getting started guides and setup files for Claude Code
-- Slash command skill definitions (SKILL.md format)
-- Native agent definition templates (.claude/agents/ format)
-- AGENTS.md templates (cross-platform AI agent standard)
-- Bot templates (CLAUDE.md files for different project types)
-- Multiagent workflow decision guides
-- Pre-ship review patterns
-- Session management checklists and progress templates
+- A generic Claude Code guide: install, permission modes and sandboxing, CLAUDE.md,
+  context management, skills, subagents, hooks, MCP and plugins, built-in review skills,
+  and token efficiency
+- Downloadable markdown templates (CLAUDE.md variants, AGENTS.md, agent definitions,
+  project context, session checkpoint)
+- A self-contained installer for this hub's slash-command skills
+- A separately-labelled personal runbook — one operator's workflow, explicitly not a requirement
 
 ## What's not here
 - Credentials, API keys, server details, or private infrastructure
 - Project-specific deployment configurations
 - Any personally identifiable information
 
+## Pages
+/hub/ai/ — the public guide (index)
+/hub/ai/workflow/ — personal runbook: one operator's workflow, labelled as opinion, not requirements
+
 ## Files
-/ai/files/ONBOARDING.md — Getting started reference guide
-/ai/files/FIRST-SESSION.md — Interactive setup guide (paste into Claude Code)
-/ai/files/MULTIAGENT.md — Multiagent workflow decision guide, complexity ladder, agent teams
-/ai/files/EFFICIENCY.md — Prompting and token economics: obsolete prompting advice, prompt caching, /rewind vs /compact vs /clear, cutting token use
-/ai/files/BOT_RULES.md — Hard rules template for bots (worktree safety, deploy ownership)
-/ai/files/SESSION_CHECKLIST.md — Session management checklist (start/during/end)
-/ai/files/CONTEXT.template.md — Project context template (_SYSTEM/CONTEXT.md format)
-/ai/files/progress.md — Session progress checkpoint template
-/ai/files/CLAUDE.agent-definition.md — Native agent definition template (.claude/agents/ format)
-/ai/files/AGENTS.md.template — AGENTS.md standard template (cross-platform)
-/ai/files/CLAUDE.wordpress-tw.md — Bot template: WordPress + Tailwind dev
-/ai/files/CLAUDE.security-review.md — Bot template: Security audit mode
-/ai/files/CLAUDE.prompt-engineer.md — Bot template: Prompt design
-/ai/files/CLAUDE.persona-builder.md — Bot template: Expert team assembly
-/ai/files/install-skills.sh — Self-contained installer for the hub's slash-command skills
-/ai/files/setup.sh — New machine installer: writes ~/.claude config + skill junctions (Windows / Git Bash)
+/hub/ai/files/EFFICIENCY.md — Prompting and token economics: prompting advice that is now wrong, how prompt caching works and what invalidates it, /rewind vs /compact vs /clear, cutting token use
+/hub/ai/files/MULTIAGENT.md — Multiagent workflow decision guide: complexity ladder, delegation patterns, worktree recovery, agent chaining
+/hub/ai/files/ONBOARDING.md — Getting started reference guide
+/hub/ai/files/FIRST-SESSION.md — Interactive setup guide (paste into Claude Code and follow it)
+/hub/ai/files/BOT_RULES.md — Hard rules template for project bots (worktree safety, agent reporting, deploy ownership, self-cleanup)
+/hub/ai/files/SESSION_CHECKLIST.md — Session management checklist (start / during / end)
+/hub/ai/files/CONTEXT.template.md — Project context template (persona, roles, architecture, current state)
+/hub/ai/files/progress.md — Session checkpoint template
+/hub/ai/files/CLAUDE.agent-definition.md — Subagent definition template (.claude/agents/ format: tools, model, effort)
+/hub/ai/files/AGENTS.md.template — AGENTS.md standard template (cross-tool)
+/hub/ai/files/CLAUDE.wordpress-tw.md — Bot template: WordPress + Tailwind dev
+/hub/ai/files/CLAUDE.security-review.md — Bot template: read-only security audit mode
+/hub/ai/files/CLAUDE.prompt-engineer.md — Bot template: prompt design
+/hub/ai/files/CLAUDE.persona-builder.md — Bot template: expert team assembly
+/hub/ai/files/install-skills.sh — Self-contained installer for this hub's slash-command skills; also registers the third-party caveman plugin (github.com/JuliusBrussee/caveman — not an Anthropic product)
+/hub/ai/files/setup.sh — New machine installer. Windows / Git Bash only AND must run from inside a repo that already has .agents/skills/. Writes ~/.claude config + skill junctions. Prefer install-skills.sh, which is portable and needs no repo.
 
 ## Usage
-Freely read, reference, and use these templates. Attribution appreciated but not required.
+Freely read, reference, and reuse. Attribution appreciated but not required.

@@ -1,2 +1,4 @@
+# Publicly readable and reusable — deliberately not search-indexed.
+# This asks crawlers not to index; it is not an access restriction.
 User-agent: *
 Disallow: /hub/ai/

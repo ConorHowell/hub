@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://esm.sh; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://chportfolio.us; connect-src 'self' https://chportfolio.us; base-uri 'self'; object-src 'none'; frame-ancestors 'none';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://esm.sh; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://chportfolio.us; connect-src 'self' https://chportfolio.us; base-uri 'self'; object-src 'none';">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
   <title>AI Hub — Claude Code Reference</title>
@@ -64,6 +64,20 @@
       color: rgba(255,255,255,0.38);
       margin-top: 3px;
       letter-spacing: 0.01em;
+    }
+
+    .nav-toggle {
+      display: none;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.14);
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 8px 14px;
+      margin: 0 16px 0 0;
+      border-radius: 7px;
+      cursor: pointer;
     }
 
     .nav-group {
@@ -185,7 +199,7 @@
       margin-top: 2px;
     }
 
-    .step-body { flex: 1; }
+    .step-body { flex: 1; min-width: 0; }
 
     .step-title {
       font-weight: 600;
@@ -197,53 +211,6 @@
     .step-desc {
       font-size: 0.875rem;
       color: var(--muted);
-      line-height: 1.55;
-    }
-
-    /* ── Cards ── */
-    .cards-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 16px;
-    }
-
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 24px;
-      transition: border-color 0.15s, box-shadow 0.15s;
-    }
-
-    .card:hover {
-      border-color: var(--purple-mid);
-      box-shadow: 0 4px 20px rgba(124,58,237,0.08);
-    }
-
-    .card-badge {
-      display: inline-block;
-      background: var(--purple-light);
-      color: var(--purple);
-      font-size: 0.67rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      padding: 2px 8px;
-      border-radius: 4px;
-      margin-bottom: 14px;
-    }
-
-    .card-title {
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 8px;
-    }
-
-    .card-desc {
-      font-size: 0.875rem;
-      color: var(--muted);
-      margin-bottom: 20px;
       line-height: 1.55;
     }
 
@@ -395,6 +362,8 @@
       margin-bottom: 0;
     }
 
+    .callout p + p { margin-top: 10px; }
+
     .callout .code-block {
       background: rgba(255,255,255,0.7);
       border-color: var(--purple-mid);
@@ -407,6 +376,15 @@
       margin-top: 10px;
       margin-bottom: 0;
     }
+
+    .callout.warn {
+      background: #fef3c7;
+      border-color: #fcd34d;
+    }
+    .callout.warn .callout-label { color: #92400e; }
+    .callout.warn p { color: #78350f; }
+    .callout.warn .note { color: #92400e; }
+    .callout.warn .code-block { background: rgba(255,255,255,0.75); border-color: #fcd34d; }
 
     /* ── Buttons ── */
     .btn {
@@ -464,12 +442,21 @@
       gap: 8px;
     }
 
-    /* ── Files table ── */
+    /* ── Tables ── */
+    .table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin-bottom: 28px;
+      max-width: 100%;
+    }
+
     .files-table {
       width: 100%;
       border-collapse: collapse;
       font-size: 0.9rem;
     }
+
+    .table-wrap .files-table { min-width: 520px; }
 
     .files-table th {
       text-align: left;
@@ -502,12 +489,15 @@
       font-size: 0.875rem;
     }
 
+    .files-table.prose td:first-child { white-space: normal; }
+
     /* ── Install tabs ── */
     .install-tabs {
       display: flex;
       gap: 0;
       margin: 10px 0 0;
       border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
     }
     .install-tab {
       background: none;
@@ -574,188 +564,119 @@
         overflow-y: visible;
         padding: 0;
         display: flex;
-        flex-direction: row;
         flex-wrap: wrap;
         align-items: center;
-        gap: 0;
-        border-bottom: 1px solid rgba(255,255,255,0.08);
       }
 
       .sidebar-brand {
         padding: 14px 20px;
         border-bottom: none;
         margin-bottom: 0;
-        border-right: 1px solid rgba(255,255,255,0.08);
+        flex: 1 1 auto;
       }
 
-      .nav-group { display: flex; flex-direction: row; margin-top: 0; }
-      .nav-group-label { display: none; }
+      .nav-toggle { display: inline-flex; }
+
+      .nav-groups {
+        display: none;
+        flex: 1 1 100%;
+        border-top: 1px solid rgba(255,255,255,0.08);
+        max-height: 65vh;
+        overflow-y: auto;
+        padding-bottom: 12px;
+      }
+
+      .sidebar.nav-open .nav-groups { display: block; }
+
+      .nav-group { margin-top: 10px; }
+      .nav-group-label { padding: 0 20px 2px; }
 
       .nav-link {
-        padding: 14px 14px;
-        font-size: 0.8rem;
+        padding: 8px 20px;
         border-right: none;
-        border-bottom: 2px solid transparent;
+        border-left: 2px solid transparent;
       }
 
-      .nav-link.active { border-bottom-color: #7c3aed; border-right-color: transparent; }
+      .nav-link.active { border-left-color: #7c3aed; border-right-color: transparent; }
 
       .main { margin-left: 0; padding: 32px 24px 60px; max-width: 100%; }
       .suite-commands { grid-template-columns: 1fr; }
       .skill-card.suite { grid-column: auto; }
+      .suite-cmd .skill-trigger { min-width: 0; }
     }
 
     @media (max-width: 600px) {
       .main { padding: 24px 16px 48px; }
       .section-title { font-size: 1.4rem; }
     }
-    .auth-overlay {
-      position: fixed; inset: 0; z-index: 9999;
-      background: rgba(4,4,13,0.97);
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Segoe UI', system-ui, sans-serif;
-    }
-    .auth-card {
-      background: linear-gradient(145deg, #080814 0%, #0d0d1f 100%);
-      border: 1px solid rgba(240,168,48,0.25);
-      border-radius: 12px; padding: 2.5rem; width: 340px;
-      display: flex; flex-direction: column; gap: 1rem;
-    }
-    .auth-card h2 {
-      font-size: 1.4rem; font-weight: 800; letter-spacing: .18em; text-transform: uppercase;
-      background: linear-gradient(135deg, #8ab8d8 0%, #e0ecf8 45%, #a0b8cc 55%, #8ab8d8 100%);
-      background-size: 200% 200%;
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-      filter: drop-shadow(0 0 20px rgba(240,168,48,0.25));
-    }
-    .auth-card p { font-size: .8rem; color: #4a5472; margin: 0; }
-    .auth-card input[type="password"], .auth-card input[type="email"] {
-      width: 100%; padding: .65rem .85rem;
-      background: #04040d; border: 1px solid rgba(160,170,220,0.15);
-      border-radius: 6px; color: #c0cce8; font-size: .9rem; outline: none;
-      transition: border-color .2s;
-    }
-    .auth-card input[type="password"]:focus, .auth-card input[type="email"]:focus { border-color: rgba(240,168,48,0.55); }
-    .auth-unlock-btn {
-      padding: .65rem 1.5rem; background: #f0a830; color: #04040d;
-      border: none; border-radius: 6px;
-      font-size: .85rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
-      cursor: pointer; transition: background .2s, transform .1s;
-    }
-    .auth-unlock-btn:hover { background: #f8bc50; }
-    .auth-unlock-btn:active { transform: scale(0.98); }
-    .auth-error { font-size: .75rem; color: #f87171; min-height: 1em; }
-    @keyframes auth-shake {
-      0%, 100% { transform: translateX(0); }
-      15%  { transform: translateX(-8px); }
-      30%  { transform: translateX(8px); }
-      45%  { transform: translateX(-6px); }
-      60%  { transform: translateX(6px); }
-      75%  { transform: translateX(-3px); }
-      90%  { transform: translateX(3px); }
-    }
-    .auth-shake { animation: auth-shake .45s ease; }
   </style>
 </head>
 <body>
+  <!-- Hub sign-in gate. Self-contained on purpose: its styles live here rather than in the
+       page stylesheet, because a CSS refactor once silently stripped this. Gates on the SHARED
+       Hub PocketBase session, so signing in anywhere in the Hub unlocks this with no prompt.
+       Convenience gate, not access control — the content is public by design. -->
+  <style>
+    .hub-gate{position:fixed;inset:0;background:#1e1b4b;display:flex;align-items:center;
+      justify-content:center;z-index:9999;font-family:system-ui,-apple-system,sans-serif}
+    .hub-gate-card{background:#fff;border-radius:12px;padding:2.25rem;width:min(340px,88vw);
+      box-shadow:0 20px 60px rgba(0,0,0,.35)}
+    .hub-gate-card h2{margin:0 0 .35rem;font-size:1.1rem;color:#111827}
+    .hub-gate-card p{margin:0 0 1.15rem;font-size:.82rem;color:#6b7280}
+    .hub-gate-card input{width:100%;padding:.65rem .85rem;margin-bottom:.6rem;font-size:.9rem;
+      border:1px solid #e5e7eb;border-radius:7px;background:#f8f9fa;color:#111827}
+    .hub-gate-card input:focus{outline:none;border-color:#7c3aed}
+    .hub-gate-card button{width:100%;padding:.65rem;border:0;border-radius:7px;background:#7c3aed;
+      color:#fff;font-size:.9rem;font-weight:600;cursor:pointer}
+    .hub-gate-card button:disabled{opacity:.55;cursor:default}
+    .hub-gate-err{min-height:1.1rem;margin-top:.6rem;font-size:.78rem;color:#dc2626}
+  </style>
   <script>
-    (function() {
-      // Gate on the shared Hub PocketBase session, not a page-local password.
-      // Signing in anywhere in the Hub (the same session the sync uses) unlocks this page
-      // with no prompt. Nothing here is secret — this keeps the page tidy for one operator,
-      // it is not an access control.
-      var AUTH_KEY = 'pocketbase_auth';
-      var PB = 'https://chportfolio.us/pb';
-
-      function storedToken() {
-        try {
-          var raw = localStorage.getItem(AUTH_KEY);
-          if (!raw) return null;
-          var data = JSON.parse(raw);
-          return data && data.token ? data.token : null;
-        } catch (e) { return null; }
+    (function () {
+      var KEY = 'pocketbase_auth', PB = 'https://chportfolio.us/pb';
+      function token() {
+        try { var d = JSON.parse(localStorage.getItem(KEY) || 'null'); return d && d.token || null; }
+        catch (e) { return null; }
       }
-
-      function saveAuth(data) {
-        localStorage.setItem(AUTH_KEY, JSON.stringify({ token: data.token, record: data.record }));
-      }
-
-      // A token in localStorage is a claim, not proof — the server decides.
-      function verify(token) {
-        return fetch(PB + '/api/collections/users/auth-refresh', {
-          method: 'POST',
-          headers: { 'Authorization': token }
-        }).then(function (res) {
-          if (!res.ok) return false;
-          return res.json().then(function (data) { saveAuth(data); return true; });
-        }).catch(function () {
-          // Offline is not "signed out" — don't lock someone out of a docs page over a flaky network.
-          return true;
-        });
-      }
-
-      function showOverlay() {
-        var overlay = document.createElement('div');
-        overlay.className = 'auth-overlay';
-        overlay.innerHTML =
-          '<div class="auth-card" id="auth-card">' +
-            '<h2>AI HUB</h2>' +
-            '<p>Sign in with your Hub account</p>' +
-            '<input type="email" id="auth-email" placeholder="Email" autocomplete="username" />' +
-            '<input type="password" id="auth-input" placeholder="Password" autocomplete="current-password" />' +
-            '<button class="auth-unlock-btn" id="auth-submit">Sign in</button>' +
-            '<div class="auth-error" id="auth-error"></div>' +
-          '</div>';
-        document.body.appendChild(overlay);
-
-        var email = document.getElementById('auth-email');
-        var input = document.getElementById('auth-input');
-        var btn   = document.getElementById('auth-submit');
-        var err   = document.getElementById('auth-error');
-        var card  = document.getElementById('auth-card');
-
-        email.focus();
-
-        function fail(msg) {
-          err.textContent = msg;
-          card.classList.remove('auth-shake');
-          void card.offsetWidth;
-          card.classList.add('auth-shake');
-          input.value = '';
-          input.focus();
-        }
-
+      function save(d) { localStorage.setItem(KEY, JSON.stringify({ token: d.token, record: d.record })); }
+      function show() {
+        var o = document.createElement('div');
+        o.className = 'hub-gate';
+        o.innerHTML = '<div class="hub-gate-card"><h2>AI Hub</h2>' +
+          '<p>Sign in with your Hub account</p>' +
+          '<input type="email" id="hg-email" placeholder="Email" autocomplete="username">' +
+          '<input type="password" id="hg-pass" placeholder="Password" autocomplete="current-password">' +
+          '<button id="hg-go">Sign in</button><div class="hub-gate-err" id="hg-err"></div></div>';
+        document.body.appendChild(o);
+        var em = o.querySelector('#hg-email'), pw = o.querySelector('#hg-pass'),
+            go = o.querySelector('#hg-go'), er = o.querySelector('#hg-err');
+        em.focus();
         function attempt() {
-          if (!email.value.trim() || !input.value) return;
-          btn.disabled = true;
+          if (!em.value.trim() || !pw.value) return;
+          go.disabled = true; er.textContent = '';
           fetch(PB + '/api/collections/users/auth-with-password', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ identity: email.value.trim(), password: input.value })
-          }).then(function (res) {
-            if (!res.ok) { fail('Incorrect email or password'); return; }
-            return res.json().then(function (data) { saveAuth(data); overlay.remove(); });
-          }).catch(function () {
-            fail('Network error — try again');
-          }).then(function () { btn.disabled = false; });
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ identity: em.value.trim(), password: pw.value })
+          }).then(function (r) {
+            if (!r.ok) { er.textContent = 'Incorrect email or password'; pw.value = ''; pw.focus(); return; }
+            return r.json().then(function (d) { save(d); o.remove(); });
+          }).catch(function () { er.textContent = 'Network error — try again'; })
+            .then(function () { go.disabled = false; });
         }
-
-        btn.addEventListener('click', attempt);
-        email.addEventListener('keydown', function (e) { if (e.key === 'Enter') input.focus(); });
-        input.addEventListener('keydown', function (e) { if (e.key === 'Enter') attempt(); });
+        go.addEventListener('click', attempt);
+        em.addEventListener('keydown', function (e) { if (e.key === 'Enter') pw.focus(); });
+        pw.addEventListener('keydown', function (e) { if (e.key === 'Enter') attempt(); });
       }
-
       function gate() {
-        var token = storedToken();
-        if (!token) { showOverlay(); return; }
-        verify(token).then(function (ok) { if (!ok) showOverlay(); });
+        var t = token();
+        if (!t) { show(); return; }
+        // A token in localStorage is a claim, not proof — let the server decide.
+        fetch(PB + '/api/collections/users/auth-refresh', { method: 'POST', headers: { Authorization: t } })
+          .then(function (r) { if (!r.ok) { show(); return; } return r.json().then(save); })
+          .catch(function () { /* offline is not signed-out */ });
       }
-
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', gate);
-      } else {
-        gate();
-      }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', gate);
+      else gate();
     })();
   </script>
 
@@ -763,38 +684,46 @@
   <nav class="sidebar" id="sidebar">
     <div class="sidebar-brand">
       <h1>AI Hub</h1>
-      <p>Claude Code · Skills · Templates</p>
+      <p>A generic Claude Code guide</p>
     </div>
+    <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="navGroups">Menu</button>
 
-    <div class="nav-group">
-      <div class="nav-group-label">Getting Started</div>
-      <a href="#introduction" class="nav-link active">Introduction</a>
-      <a href="#quickstart" class="nav-link">Quick Start</a>
-    </div>
+    <div class="nav-groups" id="navGroups">
+      <div class="nav-group">
+        <div class="nav-group-label">Start</div>
+        <a href="#introduction" class="nav-link active">Introduction</a>
+        <a href="#quickstart" class="nav-link">Quick Start</a>
+        <a href="#install" class="nav-link">1 · Install Claude Code</a>
+      </div>
 
-    <div class="nav-group">
-      <div class="nav-group-label">Setup</div>
-      <a href="#global-rules" class="nav-link">Global Rules</a>
-      <a href="#setup" class="nav-link">Setup Files</a>
-    </div>
+      <div class="nav-group">
+        <div class="nav-group-label">Safety &amp; Context</div>
+        <a href="#permissions" class="nav-link">2 · Permission Modes</a>
+        <a href="#claude-md" class="nav-link">3 · CLAUDE.md</a>
+        <a href="#context" class="nav-link">4 · Context Management</a>
+      </div>
 
-    <div class="nav-group">
-      <div class="nav-group-label">Extensions</div>
-      <a href="#skills" class="nav-link">Slash Commands</a>
-      <a href="#native-agents" class="nav-link">Native Agents</a>
-      <a href="#write-skill" class="nav-link">Write Your Own</a>
-    </div>
+      <div class="nav-group">
+        <div class="nav-group-label">Extending</div>
+        <a href="#skills" class="nav-link">5 · Skills</a>
+        <a href="#write-skill" class="nav-link">Write Your Own Skill</a>
+        <a href="#subagents" class="nav-link">6 · Subagents</a>
+        <a href="#hooks" class="nav-link">7 · Hooks</a>
+        <a href="#mcp-plugins" class="nav-link">8 · MCP &amp; Plugins</a>
+      </div>
 
-    <div class="nav-group">
-      <div class="nav-group-label">Templates</div>
-      <a href="#bot-templates" class="nav-link">Bot Templates</a>
-    </div>
+      <div class="nav-group">
+        <div class="nav-group-label">Quality &amp; Cost</div>
+        <a href="#review-skills" class="nav-link">9 · Built-in Review</a>
+        <a href="#efficiency" class="nav-link">10 · Efficiency</a>
+      </div>
 
-    <div class="nav-group">
-      <div class="nav-group-label">Reference</div>
-      <a href="#subagent-rules" class="nav-link">Subagent Rules</a>
-      <a href="#ship-review" class="nav-link">Pre-ship Review</a>
-      <a href="#files" class="nav-link">All Files</a>
+      <div class="nav-group">
+        <div class="nav-group-label">Reference</div>
+        <a href="#templates" class="nav-link">Templates</a>
+        <a href="#workflow" class="nav-link">One Operator's Workflow</a>
+        <a href="#files" class="nav-link">All Files</a>
+      </div>
     </div>
   </nav>
 
@@ -804,212 +733,372 @@
     <!-- INTRODUCTION -->
     <section class="doc-section" id="introduction">
       <h2 class="section-title">Introduction</h2>
-      <p class="section-lead">A pickup-and-play resource for Claude Code — skills, bot templates, and setup guides for AI-assisted development.</p>
-      <p>Claude Code is Anthropic's CLI for Claude — a terminal-based AI assistant for software engineering tasks. It reads your project files, runs commands, and edits code directly.</p>
-      <p>Three interfaces, all equivalent: <strong>VS Code extension</strong> (marketplace), <strong>CLI</strong> (terminal), or <strong>Desktop app</strong>. Skills, CLAUDE.md, hooks, and <code>~/.claude/</code> config work the same on all three. Install from <a href="https://claude.ai/code" target="_blank" rel="noopener">claude.ai/code</a>.</p>
-      <p>What's here: global rules templates, slash command skills, and drop-in bot templates (CLAUDE.md files).</p>
+      <p class="section-lead">How Claude Code works — permissions, context, skills, subagents, hooks — plus templates you can download and use in any project.</p>
+      <p>Claude Code is Anthropic's coding agent for Claude. It reads your project files, runs commands, and edits code directly. Three interfaces, all equivalent: a <strong>VS Code / JetBrains extension</strong>, a <strong>terminal CLI</strong>, and a <strong>desktop app</strong>. Skills, <code>CLAUDE.md</code>, hooks, and <code>~/.claude/</code> config behave the same on all three.</p>
+      <p>This guide is written for someone who has just installed it and wants their first week to be safe and cheap. Sections are ordered by what bites first: permissions before skills, context before agents.</p>
+      <p>Everything here is meant to be true for anyone. The parts that are specific to one person's habits live separately, under <a href="#workflow">One Operator's Workflow</a>, and are labelled as such.</p>
+      <div class="callout">
+        <div class="callout-label">Conventions</div>
+        <p>Commands written as <code>/name</code> are typed into a Claude Code session. Commands in a <code>$</code> block are typed into your shell. Anything described as an opinion is marked as one; everything else is checked against the official documentation.</p>
+      </div>
     </section>
 
     <!-- QUICK START -->
     <section class="doc-section" id="quickstart">
       <h2 class="section-title">Quick Start</h2>
-      <p class="section-lead">Ideal order for a new machine or new project — step 1 to fully configured bot.</p>
+      <p class="section-lead">Six steps from nothing to a configured session. Steps 4 and 5 are optional.</p>
       <div class="steps">
+
         <div class="step">
           <div class="step-num">1</div>
           <div class="step-body">
             <div class="step-title">Install Claude Code</div>
-            <div class="install-tabs">
-              <button class="install-tab active" data-target="tab-vscode">VS Code</button>
-              <button class="install-tab" data-target="tab-cli">CLI / Desktop</button>
-            </div>
-            <div class="install-panel active" id="tab-vscode">
-              <p>Open Extensions (<code>⌘⇧X</code> / <code>Ctrl+Shift+X</code>) → search <strong>Claude Code</strong> by Anthropic → Install.</p>
-              <p>Claude Code appears as a panel in the VS Code sidebar. Open any project folder and start a session from there.</p>
-            </div>
-            <div class="install-panel" id="tab-cli">
-              <p>Download the CLI installer or Desktop app from <a href="https://claude.ai/code" target="_blank" rel="noopener">claude.ai/code</a> (macOS, Windows, Linux).</p>
-              <p>Run <code>claude</code> in any terminal to start a session. The Desktop app wraps the same CLI in a native window.</p>
-            </div>
-            <p class="step-note">Skills, CLAUDE.md, hooks, and <code>~/.claude/</code> config work identically across VS Code, CLI, and Desktop.</p>
+            <div class="step-desc">Extension, CLI, or desktop app — see <a href="#install">Install Claude Code</a> for each path.</div>
           </div>
         </div>
+
         <div class="step">
           <div class="step-num">2</div>
           <div class="step-body">
-            <div class="step-title">Set global rules — <code>~/.claude/CLAUDE.md</code></div>
-            <div class="step-desc">The <a href="#setup">First Session Guide</a> creates this for you. Or run <a href="files/setup.sh" download>setup.sh</a> to write it automatically. Global rules apply to every project — put session-start behavior, safety rules, and <a href="#subagent-rules">subagent delegation rules</a> here.</div>
+            <div class="step-title">Start in plan mode</div>
+            <div class="step-desc">Type <code>/plan</code>, or press <code>Shift+Tab</code> to cycle modes. Claude reads and reasons but does not edit until you approve. This is the single most useful habit for a new user — see <a href="#permissions">Permission Modes</a>.</div>
           </div>
         </div>
+
         <div class="step">
           <div class="step-num">3</div>
           <div class="step-body">
-            <div class="step-title">Install Caveman first — token savings from session 1</div>
-            <div class="btn-row" style="margin-bottom: 10px;">
-              <a href="files/install-skills.sh" download class="btn btn-primary">↓ Download install-skills.sh</a>
-            </div>
-            <div class="step-desc">Drop the file anywhere and tell Claude Code: <strong>"run install-skills.sh caveman"</strong> — or run it yourself in a terminal. Detects if already installed. See <a href="#skills">Caveman Suite</a> for the full command set.</div>
-            <details class="advanced">
-              <summary>Terminal command</summary>
-              <div class="code-block shell">bash install-skills.sh caveman</div>
-            </details>
+            <div class="step-title">Generate project context — <code>/init</code></div>
+            <div class="step-desc">Run <code>/init</code> in your project root. It writes a <code>CLAUDE.md</code> describing the codebase. Then trim it — see <a href="#claude-md">CLAUDE.md</a>. Confirm it actually loaded with <code>/context</code>.</div>
           </div>
         </div>
+
         <div class="step">
           <div class="step-num">4</div>
           <div class="step-body">
-            <div class="step-title">Install hub skills</div>
-            <div class="btn-row" style="margin-bottom: 10px;">
+            <div class="step-title">Optional — install the caveman plugin</div>
+            <div class="step-desc">A terse-output mode that cuts token use substantially. Download the installer, then run it:</div>
+            <div class="btn-row" style="margin: 10px 0;">
               <a href="files/install-skills.sh" download class="btn btn-primary">↓ Download install-skills.sh</a>
             </div>
-            <div class="step-desc">Self-contained — all hub skills embedded, no repo clone needed. Drop it anywhere and tell Claude Code: <strong>"run install-skills.sh"</strong>. See <a href="#skills">Skills section</a> for what gets installed.</div>
-            <details class="advanced">
-              <summary>Terminal command</summary>
-              <div class="code-block shell">bash install-skills.sh</div>
-            </details>
+            <div class="code-block shell">bash install-skills.sh caveman</div>
+            <div class="callout warn" style="margin: 12px 0 0;">
+              <div class="callout-label">Third-party code — read before running</div>
+              <p>Caveman is <strong>not an Anthropic product</strong>. It is a community plugin fetched from <a href="https://github.com/JuliusBrussee/caveman" target="_blank" rel="noopener">github.com/JuliusBrussee/caveman</a>. Installing it adds a marketplace entry and enables the plugin in <code>~/.claude/settings.json</code>; plugin skills and hooks then run inside your session with your privileges.</p>
+              <p>Review the repository before enabling it. To remove it later, use <code>/plugin</code> and uninstall it there.</p>
+            </div>
           </div>
         </div>
+
         <div class="step">
           <div class="step-num">5</div>
           <div class="step-body">
-            <div class="step-title">Add a project CLAUDE.md</div>
-            <div class="step-desc">Drop a CLAUDE.md at your project root. Claude reads it at every session start. Project rules override global rules. Grab a template from <a href="#bot-templates">Bot Templates</a>.</div>
+            <div class="step-title">Optional — install this hub's skills</div>
+            <div class="step-desc">The same script, with no argument, installs the caveman plugin plus four skills written for this hub: <code>cavecrew</code>, <code>ship-review</code>, <code>prompt-engineer</code>, <code>persona-builder</code>. It is self-contained — the skill bodies are embedded, no repository clone needed. See <a href="#skills">Skills</a>.</div>
+            <div class="code-block shell">bash install-skills.sh                       # caveman + all four skills
+bash install-skills.sh cavecrew ship-review  # pick individual skills</div>
           </div>
         </div>
+
         <div class="step">
           <div class="step-num">6</div>
           <div class="step-body">
-            <div class="step-title">Design specialized prompts with <a href="#skills"><code>/prompt-engineer</code></a></div>
-            <div class="step-desc">Invoke and answer 6 intake questions. Outputs a finished prompt with design rationale. Any domain.</div>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num">7</div>
-          <div class="step-body">
-            <div class="step-title">Verify everything works</div>
-            <div class="step-desc">Start a Claude Code session. Type <code>/caveman</code> — a terse response confirms skills are loaded. Installed skills also appear listed in the session startup context.</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- GLOBAL RULES -->
-    <section class="doc-section" id="global-rules">
-      <h2 class="section-title">Global Rules</h2>
-      <p class="section-lead">The <code>~/.claude/CLAUDE.md</code> file sets Claude's baseline behavior across every project and session.</p>
-
-      <p>Two scopes of CLAUDE.md files exist:</p>
-      <ul>
-        <li><code>~/.claude/CLAUDE.md</code> — global rules, apply across all projects and sessions</li>
-        <li><code>&lt;project&gt;/CLAUDE.md</code> — project-specific rules, override globals</li>
-      </ul>
-
-      <p>A good CLAUDE.md is short and scannable. Include:</p>
-      <ul>
-        <li>Role and persona for this project</li>
-        <li>Project structure and key files</li>
-        <li>Rules — what to always do, what to never do</li>
-        <li>Next Steps — current in-progress work so any bot can pick up immediately</li>
-        <li>Subagent delegation rules, if your project uses Claude's agent features — see <a href="#subagent-rules">Subagent Rules</a></li>
-      </ul>
-    </section>
-
-    <!-- SETUP FILES -->
-    <section class="doc-section" id="setup">
-      <h2 class="section-title">Setup Files</h2>
-      <p class="section-lead">Files for setting up Claude Code on any machine.</p>
-      <div class="cards-grid">
-
-        <div class="card">
-          <div class="card-badge">Start here</div>
-          <div class="card-title">First Session Guide</div>
-          <div class="card-desc">Download, then paste into Claude Code and say <strong>"read this and follow it"</strong>. Claude asks questions, creates your global rules, installs skills, and sets up your project.</div>
-          <div class="btn-row">
-            <a href="files/FIRST-SESSION.md" download class="btn btn-primary">↓ Download prompt</a>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-badge">Reference</div>
-          <div class="card-title">Onboarding Guide</div>
-          <div class="card-desc">Setup reference — skills table, bot templates, subagent safety rules, global install guidance, and quickstart. Load in Claude Code or paste into any AI chat.</div>
-          <div class="btn-row">
-            <a href="https://claude.ai/claude-code/onboard/K-BGkmyf4dVq" target="_blank" rel="noopener" class="btn btn-primary">⊞ Load in Claude Code</a>
-            <a href="files/ONBOARDING.md" download class="btn btn-outline">↓ Download</a>
-            <button class="btn btn-outline btn-sm" onclick="copyOnboarding(this)">⎘ Copy text</button>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-badge">Script</div>
-          <div class="card-title">New Machine Setup</div>
-          <div class="card-desc">Installs <code>~/.claude</code> config and skill junctions on a fresh Windows machine. Requires Git Bash.</div>
-          <div class="code-block shell">bash setup.sh</div>
-          <div class="btn-row">
-            <a href="files/setup.sh" download class="btn btn-primary">↓ Download setup.sh</a>
+            <div class="step-title">Verify</div>
+            <div class="step-desc"><code>/context</code> shows what actually loaded into the context window — your <code>CLAUDE.md</code>, tools, and MCP definitions. <code>/status</code> shows the model, effort level, and current context usage. <code>/skills</code> lists the skills the session can see. If a skill you installed is missing from that list, its <code>SKILL.md</code> frontmatter is the first thing to check.</div>
           </div>
         </div>
 
       </div>
     </section>
 
-    <!-- SKILLS -->
+    <!-- 1 · INSTALL -->
+    <section class="doc-section" id="install">
+      <h2 class="section-title">1 · Install Claude Code</h2>
+      <p class="section-lead">Pick whichever interface you already live in. They share the same config directory, so switching later costs nothing.</p>
+
+      <div class="install-tabs">
+        <button class="install-tab active" data-target="tab-vscode">VS Code</button>
+        <button class="install-tab" data-target="tab-cli">Terminal</button>
+        <button class="install-tab" data-target="tab-desktop">Desktop</button>
+      </div>
+
+      <div class="install-panel active" id="tab-vscode">
+        <p>Open Extensions (<code>⌘⇧X</code> / <code>Ctrl+Shift+X</code>) → search <strong>Claude Code</strong> by Anthropic → Install.</p>
+        <p>Claude Code appears as a panel in the sidebar. Open a project folder and start a session from there. A JetBrains plugin is available through the JetBrains marketplace the same way.</p>
+      </div>
+
+      <div class="install-panel" id="tab-cli">
+        <p>The native installer is the recommended path — it needs no Node.js and updates itself in the background.</p>
+        <p>macOS, Linux, WSL:</p>
+        <div class="code-block shell">curl -fsSL https://claude.ai/install.sh | bash</div>
+        <p>Windows PowerShell:</p>
+        <div class="code-block">irm https://claude.ai/install.ps1 | iex</div>
+        <p>Package managers also work — <code>brew install --cask claude-code</code> on macOS, <code>winget install Anthropic.ClaudeCode</code> on Windows. Neither auto-updates, so you upgrade them yourself.</p>
+        <p>Then, from any project directory:</p>
+        <div class="code-block shell">claude</div>
+        <p>Run <code>/doctor</code> once after installing — it checks the install for common setup problems.</p>
+      </div>
+
+      <div class="install-panel" id="tab-desktop">
+        <p>Download the desktop app from <a href="https://claude.ai/code" target="_blank" rel="noopener">claude.ai/code</a> (macOS, Windows, Linux). It wraps the same agent in a native window.</p>
+        <p>Config, skills, and hooks are shared with the CLI — anything you set up in one is live in the other.</p>
+      </div>
+
+      <p class="step-note">All three read the same <code>~/.claude/</code> directory: <code>settings.json</code>, <code>CLAUDE.md</code>, <code>skills/</code>, <code>agents/</code>, and <code>hooks/</code>.</p>
+    </section>
+
+    <!-- 2 · PERMISSION MODES -->
+    <section class="doc-section" id="permissions">
+      <h2 class="section-title">2 · Permission Modes</h2>
+      <p class="section-lead">Permission mode decides what Claude may do without asking. It is the setting that most determines whether your first week goes well.</p>
+
+      <p>Press <code>Shift+Tab</code> to cycle modes in the session, or type <code>/plan</code> to jump straight to plan mode. The mode is not a security boundary in itself — it is how much you have decided to trust the agent for this particular task.</p>
+
+      <div class="table-wrap">
+        <table class="files-table prose">
+          <thead>
+            <tr><th>Mode</th><th>What it allows</th><th>Use it when</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>default</code></td>
+              <td>Prompts the first time each tool is used.</td>
+              <td>You are learning what the agent actually does.</td>
+            </tr>
+            <tr>
+              <td><code>plan</code></td>
+              <td>Reads files and runs read-only commands. Does not edit.</td>
+              <td>Anything non-trivial. Approve the plan, then switch.</td>
+            </tr>
+            <tr>
+              <td><code>acceptEdits</code></td>
+              <td>Auto-accepts file edits and routine filesystem commands inside the working directory.</td>
+              <td>You have approved a plan and want it built without a prompt per file.</td>
+            </tr>
+            <tr>
+              <td><code>auto</code></td>
+              <td>Auto-approves tool calls, with background safety checks that the action matches what you asked for.</td>
+              <td>Steady-state work you are supervising.</td>
+            </tr>
+            <tr>
+              <td><code>dontAsk</code></td>
+              <td>Auto-<em>denies</em> anything not pre-approved by a rule.</td>
+              <td>You want a hard, silent allowlist and no interruptions.</td>
+            </tr>
+            <tr>
+              <td><code>bypassPermissions</code></td>
+              <td>Skips prompts almost entirely.</td>
+              <td>Throwaway sandboxes only — see the warning below.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">About bypassPermissions</div>
+        <p>In this mode the agent can delete files, rewrite git history, and run network commands without asking you first. Use it only in a container or a disposable checkout you would not mind losing. If you find yourself reaching for it because prompts are annoying, the right fix is an allowlist or <code>/fewer-permission-prompts</code>, not this.</p>
+      </div>
+
+      <h3>Allowlists — <code>/permissions</code></h3>
+      <p><code>/permissions</code> opens the rules UI. Rules also live in <code>settings.json</code> (global at <code>~/.claude/settings.json</code>, per-project at <code>.claude/settings.json</code>). A rule is <code>Tool(specifier)</code>:</p>
+      <div class="code-block">{
+  "permissions": {
+    "allow": [
+      "Bash(npm run test:*)",
+      "Bash(git status)",
+      "WebFetch(domain:docs.example.com)"
+    ],
+    "deny": [
+      "Bash(git push --force*)"
+    ],
+    "ask": [
+      "Bash(rm *)"
+    ]
+  }
+}</div>
+      <p>Three lists, in order of strength: <code>deny</code> blocks, <code>ask</code> always prompts, <code>allow</code> runs silently. Scope rules as narrowly as you can — <code>Bash(npm run test:*)</code> rather than <code>Bash</code>.</p>
+      <p><code>/fewer-permission-prompts</code> reads back through your own session history, finds the read-only commands you keep approving by hand, and proposes an allowlist for them. It is the cheapest way to stop being interrupted without weakening anything that matters.</p>
+
+      <h3>Sandboxing</h3>
+      <p>Separately from permission modes, Claude Code can run Bash inside an OS sandbox — filesystem writes restricted to the working directory and a session temp dir, network access filtered to an allowlist. Enable it in <code>settings.json</code>:</p>
+      <div class="code-block">{
+  "sandbox": { "enabled": true }
+}</div>
+      <p>It is implemented with Seatbelt on macOS and bubblewrap on Linux and WSL2. Native Windows is not supported. A sandbox and an allowlist solve different problems: the allowlist decides <em>what may be attempted</em>, the sandbox limits <em>how far a mistake can reach</em>. Running both is the sensible default.</p>
+
+      <div class="callout">
+        <div class="callout-label">Cost note</div>
+        <p>Changing permission mode mid-session does <strong>not</strong> invalidate the prompt cache, so switching modes as the task changes is free. Changing model or effort level mid-session is not free — see <a href="#efficiency">Efficiency</a>.</p>
+      </div>
+    </section>
+
+    <!-- 3 · CLAUDE.md -->
+    <section class="doc-section" id="claude-md">
+      <h2 class="section-title">3 · CLAUDE.md</h2>
+      <p class="section-lead">A markdown file that is loaded into every session in that project. It is the cheapest way to stop repeating yourself — and the easiest thing to ruin by writing too much.</p>
+
+      <h3>Where it lives</h3>
+      <ul>
+        <li><code>~/.claude/CLAUDE.md</code> — global. Applies in every project.</li>
+        <li><code>&lt;project&gt;/CLAUDE.md</code> — project rules. More specific, so it wins over global.</li>
+        <li><code>&lt;project&gt;/&lt;subdir&gt;/CLAUDE.md</code> — nested. Loads lazily, the first time a file in that directory is read.</li>
+        <li><code>@path/to/file.md</code> inside any of them — imports another file, so a long reference doc can live outside the always-loaded file.</li>
+      </ul>
+      <p>Run <code>/init</code> to generate a first draft from the codebase. <code>/memory</code> opens the memory files for editing.</p>
+
+      <h3>Keep it under about 200 lines</h3>
+      <p>This is the rule that people ignore and then wonder why the agent stopped following instructions. A bloated <code>CLAUDE.md</code> does not make Claude more obedient — it causes Claude to <strong>ignore your actual instructions</strong>, and it bills on every single turn of every session.</p>
+      <p>The pruning test for each line: <em>would removing this cause Claude to make mistakes?</em> If not, cut it. Things that fail the test almost every time:</p>
+      <ul>
+        <li>Descriptions of what the code obviously does — Claude can read the code.</li>
+        <li>"Double-check your work", "verify your answer", "think step by step". Current models self-verify; these instructions cause over-verification and cost tokens for nothing.</li>
+        <li>Long procedures. Move them into a <a href="#skills">skill</a>, which loads only when invoked.</li>
+        <li>Anything a <a href="#hooks">hook</a> already enforces. A hook is deterministic; prose is advisory. Prose duplicating a hook is pure overhead.</li>
+      </ul>
+
+      <h3>What earns its place</h3>
+      <ul>
+        <li>Commands that are not guessable — how to run the tests, how to start the dev server.</li>
+        <li>Hard boundaries — what must never be touched, and <em>why</em>. Giving the reason helps Claude generalise to cases you did not anticipate.</li>
+        <li>Structure that is not obvious from the tree — where the real entry point is.</li>
+        <li>Conventions a newcomer would get wrong.</li>
+      </ul>
+
+      <div class="callout warn">
+        <div class="callout-label">The mid-session trap</div>
+        <p>Editing <code>CLAUDE.md</code> during a session <strong>does not take effect</strong>. Claude keeps using the copy loaded at session start. Your edit applies on the next <code>/clear</code>, <code>/compact</code>, or restart. Confirm what is actually loaded with <code>/context</code> — note that <code>/init</code> <em>generates</em> a file, it does not verify one.</p>
+      </div>
+
+      <p>There is also <code>AGENTS.md</code>, a cross-tool convention understood by several coding agents. If you work across tools, keep the shared facts there and let <code>CLAUDE.md</code> hold the Claude-specific parts. A starter template is in <a href="#files">All Files</a>.</p>
+    </section>
+
+    <!-- 4 · CONTEXT MANAGEMENT -->
+    <section class="doc-section" id="context">
+      <h2 class="section-title">4 · Context Management</h2>
+      <p class="section-lead">The whole conversation is re-sent on every message. Managing what is in the window is most of what "using Claude Code well" means in practice.</p>
+
+      <h3>See what is going on</h3>
+      <div class="table-wrap">
+        <table class="files-table prose">
+          <thead><tr><th>Command</th><th>Tells you</th></tr></thead>
+          <tbody>
+            <tr><td><code>/context</code></td><td>What is consuming the context window right now — memory files, tool definitions, MCP servers.</td></tr>
+            <tr><td><code>/status</code></td><td>Model, effort, context percentage, running tasks — without interrupting a response.</td></tr>
+            <tr><td><code>/usage</code></td><td>Token usage and cost, attributed to skills, subagents, plugins and MCP servers.</td></tr>
+            <tr><td><code>/cost</code></td><td>Cost of the current session.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Three ways to shed context</h3>
+      <ul>
+        <li><strong><code>/rewind</code></strong> — truncates back to an earlier turn. That prefix is already cached and still warm, so it is the cheapest way to abandon a path that went wrong.</li>
+        <li><strong><code>/clear</code></strong> — costs nothing. Use it between unrelated tasks. <code>/rename</code> the session first if you might want to <code>/resume</code> it.</li>
+        <li><strong><code>/compact</code></strong> — replaces history with a summary. This one is <em>not</em> free: you pay to generate the summary. Give it a focus: <code>/compact focus on the auth bug fix</code>.</li>
+      </ul>
+
+      <div class="callout">
+        <div class="callout-label">One compaction rule</div>
+        <p>Compact <strong>only when a single long task overflows the window</strong>. Not on a message count, not at a percentage, and not before closing a session — a summary generated at the end only pays off if you actually <code>/resume</code>. Between unrelated tasks, <code>/clear</code> is strictly cheaper.</p>
+      </div>
+
+      <h3>Checkpoints and <code>/rewind</code></h3>
+      <p><code>/rewind</code> can restore the conversation, the code, or both. It is genuinely useful — and it has one limitation that catches people out:</p>
+      <div class="callout warn">
+        <div class="callout-label">Not a git replacement</div>
+        <p>Checkpoints capture only changes made through Claude's <strong>file-editing tools</strong>. Changes made by Bash commands (<code>rm</code>, <code>mv</code>, a build script) or by any external process are <strong>not</strong> captured and will not be restored. Commit before anything risky.</p>
+      </div>
+
+      <h3>Related</h3>
+      <p><code>/fork</code> branches the current session; unlike a subagent it inherits the parent's prefix exactly and reads the parent's cache. <code>/recap</code> summarises what has happened so far without discarding anything. <code>/todos</code> shows the current task list.</p>
+      <p>One behavioural rule worth more than any command: <strong>if you have corrected the same misunderstanding more than twice in a session, <code>/clear</code> and start fresh.</strong> The contradictory history is now working against you, and you pay for it on every subsequent message.</p>
+    </section>
+
+    <!-- 5 · SKILLS -->
     <section class="doc-section" id="skills">
-      <h2 class="section-title">Skills — Slash Commands</h2>
-      <p class="section-lead">Skills extend Claude Code with slash commands. Install once globally, active in every project and session.</p>
+      <h2 class="section-title">5 · Skills</h2>
+      <p class="section-lead">A skill is a folder containing a <code>SKILL.md</code>. Its body loads only when the skill is invoked — which is why procedures belong here and not in <code>CLAUDE.md</code>.</p>
+
+      <h3>Where skill files come from</h3>
+      <p>There is no magic source. A skill exists because one of these put it on disk:</p>
+      <ul>
+        <li><strong>You wrote it</strong> — see <a href="#write-skill">Write Your Own Skill</a>.</li>
+        <li><strong>A plugin shipped it</strong> — installing a plugin from a marketplace brings its skills with it. See <a href="#mcp-plugins">MCP &amp; Plugins</a>.</li>
+        <li><strong>A script wrote it</strong> — this hub's <code>install-skills.sh</code> embeds the skill bodies and writes them into <code>~/.agents/skills/</code>, then registers them.</li>
+        <li><strong>It is bundled</strong> — some skills ship with Claude Code itself. See <a href="#review-skills">Built-in Review Skills</a>.</li>
+      </ul>
+      <p>Claude Code loads skills from <code>~/.claude/skills/</code> (global) and <code>.claude/skills/</code> (project). <code>/skills</code> lists what the current session can see.</p>
+
+      <h3>Register by symlink, never by copy</h3>
+      <p>Wherever you keep the source of truth, link to it rather than copying it in. A copy drifts silently and you end up running last month's version of your own skill.</p>
+      <div class="code-block shell">mkdir -p "$HOME/.claude/skills"
+ln -sfn "/absolute/path/to/your/skills/&lt;name&gt;" "$HOME/.claude/skills/&lt;name&gt;"
+ls -l "$HOME/.claude/skills/&lt;name&gt;"   # must print '-&gt;' and the source path</div>
+      <p>Two failure modes worth knowing, because both look like success:</p>
+      <ul>
+        <li><code>ln -sfn</code> pointed at a path that does not exist <strong>exits 0</strong> and leaves a dangling link. Always run the <code>ls -l</code> check.</li>
+        <li>If <code>~/.claude/skills/&lt;name&gt;</code> is already a real directory from an older copy-based install, <code>ln -sfn</code> nests the link <em>inside</em> it and exits 0 — the stale copy keeps loading. Delete the directory first.</li>
+      </ul>
+
+      <div class="callout warn">
+        <div class="callout-label">Put the important lines at the TOP of a SKILL.md</div>
+        <p>After a compaction, invoked skill bodies are re-injected — but capped at <strong>5,000 tokens per skill and 25,000 total</strong>, oldest dropped first. Truncation keeps the <em>start</em> of the file. A skill whose critical rule sits at the bottom of a long file silently loses that rule after the first compaction, and nothing tells you.</p>
+      </div>
+
+      <h3>This hub's skills</h3>
+      <p>Four skills, plus the third-party caveman plugin, packed into one self-contained installer. Nothing here is required to use Claude Code — they are examples you can read, run, or ignore.</p>
 
       <div class="callout">
         <div class="callout-label">Install</div>
-        <p>All 4 hub skills are packed into one self-contained script. Download it and tell Claude Code: <strong>"run install-skills.sh"</strong> — or run it yourself.</p>
+        <p>Download the script and run it, or hand it to Claude Code and say <strong>"run install-skills.sh"</strong>.</p>
         <div class="btn-row" style="margin: 10px 0 12px;">
           <a href="files/install-skills.sh" download class="btn btn-primary">↓ Download install-skills.sh</a>
         </div>
-        <p>Or write your own (see <a href="#write-skill">Write Your Own Skill</a>). The <a href="#setup">First Session Guide</a> also walks you through installation interactively.</p>
-        <details class="advanced">
-          <summary>Terminal commands</summary>
-          <div class="code-block shell">bash install-skills.sh                       # all 4 skills
+        <div class="code-block shell">bash install-skills.sh                       # caveman plugin + all four skills
+bash install-skills.sh caveman               # the plugin only
 bash install-skills.sh cavecrew ship-review  # specific skills</div>
-          <div class="code-block shell">mkdir -p "$HOME/.claude/skills"
-ln -sfn "$HOME/.agents/skills/&lt;name&gt;" "$HOME/.claude/skills/&lt;name&gt;"</div>
-          <p class="note">Symlink, never copy — a copied skill drifts from its source and you end up silently running an old version. Point the link at wherever your skill actually lives. If <code>~/.claude/skills/&lt;name&gt;</code> is already a real directory from an older copy-based install, delete it first — <code>ln -sfn</code> nests inside it and exits 0, so the stale copy keeps loading and the failure looks like success.</p>
-        </details>
-        <p class="note" style="margin-top: 10px;">Common failure: skill directory must contain <code>SKILL.md</code> with valid <code>name:</code> and <code>description:</code> frontmatter. Missing file = silent failure.</p>
+        <p class="note">Common failure: the skill directory must contain a <code>SKILL.md</code> with valid <code>name:</code> and <code>description:</code> frontmatter. Missing or malformed frontmatter means the skill silently does not appear in <code>/skills</code>.</p>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-label">Caveman is third-party code</div>
+        <p>The caveman commands below come from a community plugin at <a href="https://github.com/JuliusBrussee/caveman" target="_blank" rel="noopener">github.com/JuliusBrussee/caveman</a>. It is <strong>not made by Anthropic</strong> and is not reviewed by anyone here. Installing it registers a marketplace and enables the plugin in <code>~/.claude/settings.json</code>; from then on its skills and hooks execute inside your sessions. Read the repository before enabling it, and remove it with <code>/plugin</code> if you change your mind.</p>
       </div>
 
       <div class="skills-grid">
 
         <div class="skill-card suite">
-          <div class="skill-name">Caveman Suite</div>
-          <div class="skill-desc">Terse communication framework. Drops filler, keeps all technical substance. ~75% token reduction. Recommended to activate every session by default.</div>
+          <div class="skill-name">Caveman suite <span style="font-weight:400;color:var(--muted);font-size:0.8rem;">— third-party plugin</span></div>
+          <div class="skill-desc">Terse output mode. Drops filler, keeps technical substance. The author reports roughly 75% fewer output tokens; treat that as the author's figure, not a measurement made here.</div>
           <div class="suite-commands">
             <div class="suite-cmd">
               <span class="skill-trigger">/caveman</span>
-              <span class="suite-cmd-desc">Main toggle — 6 intensity levels (lite → ultra)</span>
+              <span class="suite-cmd-desc">Main toggle — six intensity levels</span>
               <button class="btn btn-outline btn-sm" onclick="copyTrigger('/caveman',this)">⎘</button>
             </div>
             <div class="suite-cmd">
               <span class="skill-trigger">/caveman-commit</span>
-              <span class="suite-cmd-desc">Conventional Commits ≤50 chars, why not what</span>
+              <span class="suite-cmd-desc">Conventional Commits, ≤50 char subject</span>
               <button class="btn btn-outline btn-sm" onclick="copyTrigger('/caveman-commit',this)">⎘</button>
             </div>
             <div class="suite-cmd">
               <span class="skill-trigger">/caveman-review</span>
-              <span class="suite-cmd-desc">One-line PR comments: path:line: 🔴 bug: problem. fix.</span>
+              <span class="suite-cmd-desc">One-line review comments: path:line: problem. fix.</span>
               <button class="btn btn-outline btn-sm" onclick="copyTrigger('/caveman-review',this)">⎘</button>
             </div>
             <div class="suite-cmd">
-              <span class="skill-trigger">/caveman-compress FILE</span>
-              <span class="suite-cmd-desc">Compress .md files in-place, ~46% token savings</span>
+              <span class="skill-trigger">/caveman-compress</span>
+              <span class="suite-cmd-desc">Compress a markdown memory file in place</span>
               <button class="btn btn-outline btn-sm" onclick="copyTrigger('/caveman-compress',this)">⎘</button>
             </div>
             <div class="suite-cmd">
               <span class="skill-trigger">/caveman-stats</span>
-              <span class="suite-cmd-desc">Real token usage from session log</span>
+              <span class="suite-cmd-desc">Token usage read from the session log</span>
               <button class="btn btn-outline btn-sm" onclick="copyTrigger('/caveman-stats',this)">⎘</button>
             </div>
             <div class="suite-cmd">
               <span class="skill-trigger">/caveman-help</span>
-              <span class="suite-cmd-desc">Quick-reference card — all modes and triggers</span>
+              <span class="suite-cmd-desc">Quick-reference card for all modes</span>
               <button class="btn btn-outline btn-sm" onclick="copyTrigger('/caveman-help',this)">⎘</button>
             </div>
           </div>
@@ -1018,52 +1107,34 @@ ln -sfn "$HOME/.agents/skills/&lt;name&gt;" "$HOME/.claude/skills/&lt;name&gt;"<
         <div class="skill-card">
           <div class="skill-name">Cavecrew</div>
           <div class="skill-trigger">/cavecrew</div>
-          <div class="skill-desc">Compressed subagent delegation. ~60% smaller tool results — extends context budget across long sessions.</div>
+          <div class="skill-desc">A decision guide for when to delegate to a subagent instead of working inline, with compressed agent output so the result costs the main thread less.</div>
           <div class="btn-row">
             <button class="btn btn-outline btn-sm" onclick="copyTrigger('/cavecrew',this)">⎘ Copy trigger</button>
           </div>
         </div>
 
         <div class="skill-card">
-          <div class="skill-name">Ship-Review</div>
+          <div class="skill-name">Ship-review</div>
           <div class="skill-trigger">/ship-review</div>
-          <div class="skill-desc">Pre-ship diff gate. Checks HTML, credentials, JS errors. Designed to auto-run in a publish or commit pipeline.</div>
+          <div class="skill-desc">Pre-ship diff gate for static sites. First line is APPROVE or FLAG, so a shell script can branch on it. Designed to be wired into a deploy script.</div>
           <div class="btn-row">
             <button class="btn btn-outline btn-sm" onclick="copyTrigger('/ship-review',this)">⎘ Copy trigger</button>
           </div>
         </div>
 
         <div class="skill-card">
-          <div class="skill-name">Deploy Check</div>
-          <div class="skill-trigger">/deploy-check &lt;project&gt;</div>
-          <div class="skill-desc">Audits any project's deploy pipeline. Expert team: Ops Specialist + Config Auditor. Checks rsync flags, excluded files, server paths, SSH config, sensitive file exposure.</div>
-          <div class="btn-row">
-            <button class="btn btn-outline btn-sm" onclick="copyTrigger('/deploy-check',this)">⎘ Copy trigger</button>
-          </div>
-        </div>
-
-        <div class="skill-card">
-          <div class="skill-name">Security Check</div>
-          <div class="skill-trigger">/security-check &lt;project&gt;</div>
-          <div class="skill-desc">Full security audit for any web project. Expert team: Security Reviewer + Config Auditor. XSS vectors, CSP headers, SRI hashes, auth config, OWASP Top 10.</div>
-          <div class="btn-row">
-            <button class="btn btn-outline btn-sm" onclick="copyTrigger('/security-check',this)">⎘ Copy trigger</button>
-          </div>
-        </div>
-
-        <div class="skill-card">
-          <div class="skill-name">Prompt Engineer</div>
+          <div class="skill-name">Prompt engineer</div>
           <div class="skill-trigger">/prompt-engineer</div>
-          <div class="skill-desc">Structured 5-phase prompt design for any domain. Intake → analysis → draft → adversarial review → output with design rationale.</div>
+          <div class="skill-desc">Five-phase prompt design for any domain: intake, analysis, draft, adversarial review, then output with the design rationale attached.</div>
           <div class="btn-row">
             <button class="btn btn-outline btn-sm" onclick="copyTrigger('/prompt-engineer',this)">⎘ Copy trigger</button>
           </div>
         </div>
 
         <div class="skill-card">
-          <div class="skill-name">Persona Builder</div>
+          <div class="skill-name">Persona builder</div>
           <div class="skill-trigger">/persona-builder</div>
-          <div class="skill-desc">Assembles expert teams for any prompt domain. Identifies required roles, selects collaboration pattern, outputs per-role information needs.</div>
+          <div class="skill-desc">Assembles an expert-review team for a prompt domain: which roles are required, which are merely valuable, and what each one needs as input.</div>
           <div class="btn-row">
             <button class="btn btn-outline btn-sm" onclick="copyTrigger('/persona-builder',this)">⎘ Copy trigger</button>
           </div>
@@ -1075,394 +1146,513 @@ ln -sfn "$HOME/.agents/skills/&lt;name&gt;" "$HOME/.claude/skills/&lt;name&gt;"<
     <!-- WRITE YOUR OWN SKILL -->
     <section class="doc-section" id="write-skill">
       <h2 class="section-title">Write Your Own Skill</h2>
-      <p class="section-lead">A skill is two files in <code>.agents/skills/&lt;name&gt;/</code>.</p>
+      <p class="section-lead">One required file. The frontmatter is how Claude decides when the skill applies, so it is worth more care than the body.</p>
 
-      <h3>SKILL.md — the prompt with frontmatter</h3>
+      <h3><code>SKILL.md</code></h3>
       <div class="code-block">---
 name: my-skill
 description: &gt;
-  What this skill does and when to activate it.
-  Include trigger phrases — Claude uses this to match intent.
+  What this skill does, and when to use it. Include the phrases a user
+  would actually type. Say when to use it, not how eager to be.
 ---
 
-[Your skill prompt here]</div>
+The most important rules go here, in the first few lines — this is what
+survives truncation after a compaction.
 
-      <h3>README.md</h3>
-      <p>Short human summary of what the skill does, how to trigger it, and what the output looks like.</p>
+Then the detail, the examples, and the output format.</div>
+      <p>Naming matters more than it looks: the <code>description</code> is what Claude matches intent against. Describe the situation the skill is for. Avoid shouty phrasing like "CRITICAL: YOU MUST use this" — normal wording triggers more accurately, and aggressive wording causes the skill to fire when it should not.</p>
 
-      <h3>Register after creating</h3>
+      <h3>Register and verify</h3>
       <div class="code-block shell">mkdir -p "$HOME/.claude/skills"
-ln -sfn "$PWD/.agents/skills/&lt;name&gt;" "$HOME/.claude/skills/&lt;name&gt;"</div>
-      <p>Symlink, never copy — a copied skill drifts from its source and you end up silently running an old version.</p>
+ln -sfn "$PWD/skills/&lt;name&gt;" "$HOME/.claude/skills/&lt;name&gt;"
+ls -l "$HOME/.claude/skills/&lt;name&gt;"
+diff "$PWD/skills/&lt;name&gt;/SKILL.md" "$HOME/.claude/skills/&lt;name&gt;/SKILL.md"</div>
+      <p>The <code>diff</code> should print nothing. If it prints a difference, you have a copy rather than a link, and it has already drifted. Start a fresh session and check <code>/skills</code> lists the new name.</p>
+      <p>An optional <code>README.md</code> beside <code>SKILL.md</code> is for humans — what it does, how to trigger it, what the output looks like.</p>
     </section>
 
-    <!-- NATIVE AGENTS -->
-    <section class="doc-section" id="native-agents">
-      <h2 class="section-title">Native Agent Definitions</h2>
-      <p class="section-lead">Beyond slash commands — reusable agent blueprints with tool restrictions, model routing, and isolated context windows.</p>
+    <!-- 6 · SUBAGENTS -->
+    <section class="doc-section" id="subagents">
+      <h2 class="section-title">6 · Subagents</h2>
+      <p class="section-lead">A subagent runs a task in its own context window and returns only a summary. The raw output — thousands of lines of logs, test results, search hits — never enters your session.</p>
 
-      <p>Skills (slash commands) and native agents serve different purposes:</p>
+      <h3>Skills and subagents are not the same thing</h3>
+      <div class="table-wrap">
+        <table class="files-table prose">
+          <thead>
+            <tr><th></th><th>Skills</th><th>Subagents (<code>.claude/agents/</code>)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Invoked by</td><td>You, with a slash command</td><td>Claude delegates automatically, or you name one</td></tr>
+            <tr><td>Runs in</td><td>Main context by default</td><td>An isolated context window</td></tr>
+            <tr><td>Model control</td><td>Inherits the session model</td><td>Per-agent — route cheap work to a small model</td></tr>
+            <tr><td>Context impact</td><td>Output lands in the main thread</td><td>Only the summary comes back</td></tr>
+          </tbody>
+        </table>
+      </div>
 
-      <table class="files-table" style="margin-bottom: 28px;">
-        <thead>
-          <tr>
-            <th></th>
-            <th>Skills (<code>.agents/skills/</code>)</th>
-            <th>Native agents (<code>.claude/agents/</code>)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Invoked by</td>
-            <td>Slash command — manual</td>
-            <td>Claude delegates automatically, or by name</td>
-          </tr>
-          <tr>
-            <td>Runs in</td>
-            <td>Main context by default — a skill can opt into running in a subagent</td>
-            <td>Isolated context window</td>
-          </tr>
-          <tr>
-            <td>Model control</td>
-            <td>Only by running in a subagent</td>
-            <td>Yes — route cheap tasks to Haiku</td>
-          </tr>
-          <tr>
-            <td>Context impact</td>
-            <td>Floods main thread unless run in a subagent</td>
-            <td>Output stays isolated</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <p>Define agents as <code>.claude/agents/&lt;name&gt;.md</code> files — globally in <code>~/.claude/agents/</code> or per-project in <code>&lt;project&gt;/.claude/agents/</code>. Claude reads the description to decide when to route tasks automatically.</p>
-
-      <h3>Format</h3>
+      <h3>Defining one</h3>
+      <p>A subagent is a markdown file at <code>~/.claude/agents/&lt;name&gt;.md</code> (global) or <code>&lt;project&gt;/.claude/agents/&lt;name&gt;.md</code>. Claude reads the <code>description</code> to decide when to route work there, so write it as a description of the situation, not of the agent.</p>
       <div class="code-block">---
 name: reviewer
 description: &gt;
-  Adversarial diff reviewer. Use after any builder finishes, before shipping.
-  Fresh context — no knowledge of intent, only the code.
+  Adversarial diff reviewer with fresh context — no knowledge of intent,
+  only the code. Use after any builder finishes, before shipping.
 tools:
   - Read
   - Grep
   - Bash
 model: sonnet
+effort: medium
 ---
 
-You are an adversarial reviewer. Find problems. No praise.
-Output: path:line: 🔴 CRITICAL: problem. fix.
-First line: APPROVE or FLAG</div>
+You are an adversarial code reviewer. You did not write this code and you
+do not know why it was written. Report only problems that affect
+correctness or the stated requirements.
 
-      <h3>Model routing guide</h3>
+First line of your response: APPROVE or FLAG.
+Then: path:line: severity: problem. fix.</div>
+      <p>Two frontmatter keys do most of the cost work, and templates usually omit the second:</p>
       <ul>
-        <li>Search, grep, read-only investigation → <code>haiku</code> (10x cheaper)</li>
-        <li>Code review, implementation, reasoning → <code>sonnet</code></li>
-        <li>Security audit, complex synthesis → <code>sonnet</code></li>
+        <li><code>model:</code> — use the tier alias (<code>haiku</code>, <code>sonnet</code>, <code>opus</code>) rather than a pinned full ID. An alias tracks the newest model in its tier and cannot silently go stale.</li>
+        <li><code>effort:</code> — reasoning effort for this agent, independent of your session. Values run <code>low</code>, <code>medium</code>, <code>high</code>, <code>xhigh</code>, <code>max</code>. This is the real lever: your main session can stay at high effort while a search agent runs at <code>low</code>.</li>
       </ul>
-      <p>Use the short alias (<code>opus</code>, <code>sonnet</code>, <code>haiku</code>) rather than a pinned full ID — an alias tracks the newest model in its tier and can't silently go stale.</p>
+      <p><code>tools:</code> narrows what the agent can do — a read-only investigator with only <code>Read</code>, <code>Grep</code> and <code>Bash</code> cannot edit anything by accident. <code>/agents</code> lists and manages the agents a session can see.</p>
 
-      <h3>Common agent types</h3>
-      <table class="files-table" style="margin-bottom: 28px;">
-        <thead>
-          <tr>
-            <th>Agent</th>
-            <th>Scope</th>
-            <th>Tools</th>
-            <th>Model</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><code>investigator</code></td>
-            <td>Read-only code location</td>
-            <td>Read, Grep, Bash</td>
-            <td>Haiku</td>
-          </tr>
-          <tr>
-            <td><code>reviewer</code></td>
-            <td>Adversarial diff review</td>
-            <td>Read, Grep, Bash</td>
-            <td>Sonnet</td>
-          </tr>
-          <tr>
-            <td><code>security-reviewer</code></td>
-            <td>OWASP / auth / access control</td>
-            <td>Read, Grep, Bash</td>
-            <td>Sonnet</td>
-          </tr>
-          <tr>
-            <td><code>&lt;project&gt;-specialist</code></td>
-            <td>Project-specific build context</td>
-            <td>Read, Edit, Write, Bash, Grep</td>
-            <td>Sonnet</td>
-          </tr>
-        </tbody>
-      </table>
+      <h3>Routing by cost</h3>
+      <ul>
+        <li>Search, grep, read-only location work → smallest model, <code>effort: low</code>.</li>
+        <li>Scoped one- or two-file edits, diff review → mid tier, <code>effort: medium</code>.</li>
+        <li>Security review and anything adversarial → do not cheap out; keep effort high.</li>
+        <li>Architecture, cross-file design, debugging → keep it on the main thread.</li>
+      </ul>
+      <p>The last one is the counter-intuitive part. Lowering the <em>main</em> thread's effort to save money tends to backfire: a shallow first pass produces rework, and rework costs more than the reasoning would have. Push cost to the edges instead.</p>
 
-      <div class="callout">
-        <div class="callout-label">Full Decision Guide</div>
-        <p>When to use native agents vs cavecrew vs worktree agents vs dynamic workflows — see <a href="files/MULTIAGENT.md" download>MULTIAGENT.md</a> for the complete complexity ladder, chaining patterns, and agent teams playbook.</p>
+      <div class="callout warn">
+        <div class="callout-label">Delegate for volume, not for trivia</div>
+        <p>A subagent starts its own conversation with its own system prompt, so it gets <strong>no cache hits on its first call</strong>, and it uses the short 5-minute cache window even on a subscription. It is a <em>context</em> win, not automatically a token win. A one-line lookup dispatched to a subagent costs more than doing it inline. Delegate when the output is large.</p>
+        <p>The cache is also effectively scoped to one machine and one working directory, so an agent running in its own git worktree always pays a cold start. Still the right call for isolation — just not a saving.</p>
       </div>
 
-      <div class="btn-row">
-        <a href="files/CLAUDE.agent-definition.md" download class="btn btn-primary">↓ Agent definition template</a>
-        <a href="files/AGENTS.md.template" download class="btn btn-outline">↓ AGENTS.md template</a>
+      <p>A ready-made agent definition template and a full multiagent decision guide are in <a href="#files">All Files</a>.</p>
+    </section>
+
+    <!-- 7 · HOOKS -->
+    <section class="doc-section" id="hooks">
+      <h2 class="section-title">7 · Hooks</h2>
+      <p class="section-lead">A hook is a shell command Claude Code runs at a defined moment in the session. Where <code>CLAUDE.md</code> is advisory, a hook is deterministic: it runs whether or not the model felt like it.</p>
+
+      <p>This is the single highest-leverage feature most users never touch. Anything you have written into <code>CLAUDE.md</code> as "always do X" is a candidate to become a hook — and once it is a hook, the prose can be deleted, which also shortens the file that bills on every turn.</p>
+
+      <h3>Shape</h3>
+      <p>Hooks live under a <code>hooks</code> key in <code>~/.claude/settings.json</code> (global) or <code>.claude/settings.json</code> (project). Each event holds a list of matchers, each matcher a list of commands. <code>/hooks</code> opens a UI for managing them.</p>
+      <div class="code-block">{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "/absolute/path/to/guard.sh", "timeout": 30 }
+        ]
+      }
+    ]
+  }
+}</div>
+      <p>Useful events include <code>SessionStart</code>, <code>UserPromptSubmit</code>, <code>PreToolUse</code>, <code>PostToolUse</code>, <code>PreCompact</code>, <code>SubagentStop</code>, <code>Stop</code>, and <code>SessionEnd</code>. A hook communicates back by printing JSON to stdout, or by exit code: <strong>0</strong> succeeds and its stdout is parsed as JSON; <strong>2</strong> is a blocking error and stderr becomes the reason; any other code is a non-blocking error.</p>
+      <p>The field that matters most is <code>hookSpecificOutput.additionalContext</code> — text injected into Claude's context. <code>systemMessage</code>, by contrast, is shown to <em>you</em> and is not reliable as instruction to the model. If you want the model to act on it, use <code>additionalContext</code>.</p>
+
+      <h3>Template — SessionStart context injection</h3>
+      <p>Reads a project state file, if one exists, and injects it so every session starts knowing where the last one stopped. Silent when there is nothing to say.</p>
+      <div class="code-block">#!/bin/bash
+# SessionStart hook. Requires jq for safe JSON string encoding.
+DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
+OUT=""
+
+[ -f "$DIR/docs/progress.md" ] &amp;&amp; OUT="$OUT$(cat "$DIR/docs/progress.md")
+"
+
+if [ -n "$OUT" ]; then
+  printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":%s}}' \
+    "$(printf '%s' "$OUT" | jq -Rs .)"
+fi
+exit 0</div>
+
+      <h3>Template — Stop reminder</h3>
+      <p>Fires when Claude finishes responding. This one nags only if the state file is stale, so it stays quiet during normal work.</p>
+      <div class="code-block">FILE="${CLAUDE_PROJECT_DIR:-$PWD}/docs/progress.md"
+if [ ! -f "$FILE" ]; then
+  printf '{"hookSpecificOutput":{"hookEventName":"Stop","additionalContext":"No progress file exists. Create one with the current task state before ending this session."}}'
+elif ! find "$FILE" -mmin -240 -type f 2>/dev/null | grep -q .; then
+  printf '{"hookSpecificOutput":{"hookEventName":"Stop","additionalContext":"The progress file has not been updated in 4+ hours. Update it with the current task state."}}'
+fi</div>
+
+      <h3>Template — PreToolUse dangerous-command guard</h3>
+      <p>Inspects the command about to run and denies known-destructive patterns. This is the piece a permission allowlist cannot express well, because it pattern-matches the actual command string. Note the exit code: a <code>deny</code> decision is returned on stdout with <strong>exit 0</strong>, because on exit 2 stdout is discarded entirely and the reason never reaches Claude.</p>
+      <div class="code-block">#!/bin/bash
+INPUT=$(cat)
+deny() {
+  printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"%s"}}\n' "$1"
+  exit 0
+}
+
+# Fail CLOSED. `CMD=$(... || exit 0)` looks like it bails out safely, but the exit
+# runs in the subshell — CMD ends up empty, every check below misses, and the guard
+# silently allows everything. Test this path; it is the one that matters.
+if ! CMD=$(printf '%s' "$INPUT" | jq -er '.tool_input.command // ""'); then
+  deny "Could not parse the tool input, so the command could not be checked."
+fi
+
+check() {
+  if printf '%s' "$CMD" | grep -qE "$1" 2>/dev/null; then
+    deny "Blocked dangerous pattern: $2"
+  fi
+}
+
+# Use [[:space:]] rather than \s — BSD grep on macOS does not support \s in -E.
+check 'rm[[:space:]]+-rf[[:space:]]+/([[:space:]]|$)'          'rm -rf /'
+check 'rm[[:space:]]+-rf[[:space:]]+~([[:space:]]|$)'          'rm -rf ~'
+check 'git[[:space:]]+push[[:space:]]+.*(--force|[[:space:]]-f([[:space:]]|$))' 'git push --force'
+check 'git[[:space:]]+reset[[:space:]]+--hard'                  'git reset --hard'
+check 'git[[:space:]]+clean[[:space:]]+-[a-z]*f[a-z]*d'         'git clean -fd'
+check 'chmod[[:space:]]+777'                                    'chmod 777'
+check 'DROP[[:space:]]+TABLE'                                   'DROP TABLE'
+exit 0</div>
+
+      <h3>Template — PreCompact preserve list</h3>
+      <p>Runs immediately before a compaction and tells the summariser what must survive. A one-liner, no script file needed.</p>
+      <div class="code-block">printf '{"hookSpecificOutput":{"hookEventName":"PreCompact","additionalContext":"PRESERVE DURING COMPACTION: (1) the current task and which step it is on, (2) every file changed this session, (3) any uncommitted changes, (4) the next action to take."}}'</div>
+      <p class="step-note">Use <code>additionalContext</code> here, not <code>systemMessage</code> — a <code>systemMessage</code> is displayed to you and does not reach the summariser.</p>
+
+      <div class="callout warn">
+        <div class="callout-label">Hooks run with your privileges</div>
+        <p>A hook is arbitrary shell, executed automatically, with whatever access your user has. Use absolute paths, quote your variables, and never interpolate untrusted input into a command string. Hooks that arrive with a plugin are the same risk with less visibility.</p>
+      </div>
+
+      <p>Hooks are also a direct token saving: a <code>PostToolUse</code> hook that greps a test run for failures turns tens of thousands of tokens of output into a few hundred before Claude ever sees them.</p>
+    </section>
+
+    <!-- 8 · MCP & PLUGINS -->
+    <section class="doc-section" id="mcp-plugins">
+      <h2 class="section-title">8 · MCP &amp; Plugins</h2>
+      <p class="section-lead">Two different extension points that are easy to confuse. MCP adds <em>tools</em> from an external server. A plugin adds <em>skills, agents, hooks and commands</em> from a repository.</p>
+
+      <h3>MCP servers</h3>
+      <p>The Model Context Protocol lets Claude Code talk to an external service — an issue tracker, a database, a browser — through a standard tool interface. <code>/mcp</code> lists connected servers and their auth state.</p>
+      <p>The practical guidance is unglamorous: <strong>prefer a CLI tool over an MCP server when one exists.</strong> If <code>gh</code>, <code>aws</code>, or <code>psql</code> already does the job, Claude can just run it, with no tool definitions loaded into the prefix at all. MCP tool definitions are deferred by default so the cost is usually small, but <code>/context</code> will show you exactly what a given server is consuming.</p>
+
+      <h3>Plugins and marketplaces</h3>
+      <p><code>/plugin</code> opens a panel with tabs for discovering, installing and removing plugins, and for managing marketplaces. A marketplace is just a source — a GitHub repository, a git URL, a local path, or a JSON manifest:</p>
+      <div class="code-block">/plugin marketplace add owner/repo
+/plugin marketplace list
+/plugin install &lt;name&gt;@&lt;marketplace&gt;
+/plugin list</div>
+
+      <div class="callout warn">
+        <div class="callout-label">Trust warning — read this before installing anything</div>
+        <p>A plugin's skills, agents and hooks <strong>execute inside your session with your privileges</strong>. A plugin hook can run any command a shell can. A plugin skill can rewrite instructions the model then follows. This is not a sandbox and it is not reviewed by Anthropic.</p>
+        <p>Install only from sources you have actually looked at. Enabling a plugin's own MCP server can also invalidate your prompt cache for that conversation, so it is worth doing deliberately rather than while browsing.</p>
       </div>
     </section>
 
-    <!-- BOT TEMPLATES -->
-    <section class="doc-section" id="bot-templates">
-      <h2 class="section-title">Bot Templates</h2>
-      <p class="section-lead">Drop-in <code>CLAUDE.md</code> files. Each configures Claude for a specific role — drop at your project root and Claude reads it at every session start.</p>
+    <!-- 9 · BUILT-IN REVIEW SKILLS -->
+    <section class="doc-section" id="review-skills">
+      <h2 class="section-title">9 · Built-in Review Skills</h2>
+      <p class="section-lead">Claude Code ships with review skills. Try these before writing your own — most of what people build by hand already exists here.</p>
+
+      <div class="table-wrap">
+        <table class="files-table prose">
+          <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><code>/code-review</code></td>
+              <td>Reviews your working diff for bugs and correctness problems. This is the general-purpose one — reach for it before shipping anything.</td>
+            </tr>
+            <tr>
+              <td><code>/security-review</code></td>
+              <td>Security-focused pass over the pending changes on the branch. Use it whenever a change touches auth, input handling, or anything that reaches the network.</td>
+            </tr>
+            <tr>
+              <td><code>/simplify</code></td>
+              <td>Quality pass over changed code — reuse, dead code, over-abstraction. It deliberately does <em>not</em> hunt for bugs; that is <code>/code-review</code>'s job.</td>
+            </tr>
+            <tr>
+              <td><code>/verify</code></td>
+              <td>Builds and runs the app to confirm a change actually works, rather than reasoning that it should.</td>
+            </tr>
+            <tr>
+              <td><code>/review</code></td>
+              <td>Reviews a GitHub pull request, as opposed to your local diff.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>So when is a custom review skill worth writing?</h3>
+      <p>When it encodes something the built-ins cannot know:</p>
+      <ul>
+        <li><strong>A machine-readable verdict.</strong> A custom skill can be told to make its first line <code>APPROVE</code> or <code>FLAG</code>, so a deploy script can branch on it. That is what <code>/ship-review</code> is for.</li>
+        <li><strong>Project-specific failure modes.</strong> The mistakes your codebase actually makes, which no general reviewer would look for.</li>
+        <li><strong>A narrower brief.</strong> A reviewer told to find gaps will report some even when the work is sound. Instructing it to flag only what affects correctness or the stated requirements is the difference between reviews you read and reviews you learn to ignore.</li>
+      </ul>
+      <p>If none of those apply, use the built-in. It is maintained for you.</p>
+    </section>
+
+    <!-- 10 · EFFICIENCY -->
+    <section class="doc-section" id="efficiency">
+      <h2 class="section-title">10 · Efficiency</h2>
+      <p class="section-lead">Prompting advice that is now wrong, how the prompt cache actually works, and where the money really goes. The full write-up is a download; the essentials are here.</p>
+
+      <div class="btn-row" style="margin-bottom: 28px;">
+        <a href="files/EFFICIENCY.md" download class="btn btn-primary">↓ Download EFFICIENCY.md</a>
+      </div>
+
+      <h3>Advice that has gone stale</h3>
+      <div class="table-wrap">
+        <table class="files-table prose">
+          <thead><tr><th>Old advice</th><th>Current position</th></tr></thead>
+          <tbody>
+            <tr><td>"Add <em>double-check your work</em>"</td><td>Delete it. Current models verify their own work; the leftover instruction causes over-verification — more tokens, more latency, no benefit.</td></tr>
+            <tr><td>"Say <em>think step by step</em> and list the steps"</td><td>Prefer general over prescriptive. "Think thoroughly" usually beats a hand-written plan, because the model's own reasoning often exceeds what you would have prescribed.</td></tr>
+            <tr><td>"Tell it what <em>not</em> to do"</td><td>Say what to do instead. Positive examples beat prohibitions.</td></tr>
+            <tr><td>"Longer instructions are safer"</td><td>A bloated <code>CLAUDE.md</code> causes Claude to ignore your actual instructions.</td></tr>
+            <tr><td>"If in doubt, use [tool]"</td><td>Causes tool overtriggering. Say <em>when</em> to use a tool, not how eager to be.</td></tr>
+            <tr><td>"Prefill the assistant turn to force a format"</td><td>No longer supported on current models — it is a hard API error. Use structured outputs.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>The cheapest fix available:</strong> grep your own <code>CLAUDE.md</code>, skills and agent files for "double-check", "verify your", "make sure to check" and "think step by step", and delete those lines. Fewer input tokens, fewer output tokens, lower latency, same or better quality.</p>
+
+      <h3>What actually works</h3>
+      <ul>
+        <li><strong>Give the reason with the rule.</strong> Explaining why helps Claude generalise to cases you did not anticipate.</li>
+        <li><strong>Examples beat description.</strong> Three to five relevant, diverse examples steer format and tone better than any amount of prose.</li>
+        <li><strong>Long inputs: material at the top, question at the bottom.</strong> For very large inputs, putting the question last can improve quality substantially. Most people do this backwards.</li>
+        <li><strong>Put the role in the system prompt</strong>, not the user turn. Even one sentence helps.</li>
+        <li><strong>Write specific prompts.</strong> "Improve this codebase" triggers broad scanning. "Add input validation to the login function in auth.ts" does not.</li>
+        <li><strong>Give verification targets</strong> — a test case, expected output, a screenshot to match. Self-verifiable work catches its own errors instead of costing a correction round-trip.</li>
+      </ul>
+
+      <h3>The prompt cache</h3>
+      <p>The cache matches on the <strong>prefix</strong> — the start of the request — and the match is exact. A change anywhere in the prefix recomputes everything after it. There is no per-file or per-segment caching. Two things are part of the cache key without appearing anywhere in the prompt text: <strong>the model</strong> and <strong>the effort level</strong>.</p>
+      <div class="table-wrap">
+        <table class="files-table prose">
+          <thead><tr><th>Invalidates the whole cache</th><th>Does not</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Switching model · changing effort level · turning on fast mode · connecting or disconnecting an MCP server whose tools load into the prefix · denying an entire tool by bare name · upgrading Claude Code</td>
+              <td>Invoking skills and commands · spawning a subagent · hooks · editing repo files · editing <code>CLAUDE.md</code> · changing permission mode · <code>/rewind</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout">
+        <div class="callout-label">The one habit that matters most</div>
+        <p>Choose your model and effort level <strong>at the start of a session</strong>, then leave them alone. Dropping to a cheaper model or lower effort mid-session to save money is a full cache miss: it recomputes the entire conversation, and usually costs more than it saves.</p>
+      </div>
+      <p>Cache lifetime depends on how you authenticate: roughly an hour on a Claude subscription, five minutes on an API key or a cloud provider. On a subscription, the widely repeated "batch everything, never take a break" rule does not apply — normal breaks are fine.</p>
+
+      <h3>Where the money goes</h3>
+      <ul>
+        <li><code>/clear</code> between unrelated tasks. Stale context is re-sent on <em>every</em> subsequent message.</li>
+        <li>Right-size the model. A mid-tier model handles most coding; reserve the largest for architecture and multi-step reasoning.</li>
+        <li>Delegate verbose operations — test runs, log processing, doc fetching — to <a href="#subagents">subagents</a>, so the raw output stays in their window.</li>
+        <li>Move procedures out of <code>CLAUDE.md</code> and into <a href="#skills">skills</a>. <code>CLAUDE.md</code> bills every turn; a skill body bills only when invoked.</li>
+        <li>Use <a href="#hooks">hooks</a> to preprocess output before Claude ever sees it.</li>
+        <li>Use plan mode for complex tasks. It prevents the expensive rework that follows a wrong initial direction. Skip planning when you could describe the diff in one sentence.</li>
+      </ul>
+      <p><strong>The single best health metric</strong> is the ratio of cache reads to cache writes — cache reads bill at roughly a tenth of the standard input rate. If cache creation stays high turn after turn, something in your prefix keeps changing.</p>
+    </section>
+
+    <!-- TEMPLATES -->
+    <section class="doc-section" id="templates">
+      <h2 class="section-title">Templates</h2>
+      <p class="section-lead">Drop-in starting points. Each is a plain markdown file — read it, cut what does not apply, keep the rest short.</p>
 
       <div class="templates-grid">
         <div class="template-card">
-          <div class="template-name">WordPress Dev</div>
-          <div class="template-tags">_tw (Underscores + Tailwind CSS) · Local by Flywheel · WP Engine · Pure PHP templates · Junior coder role</div>
+          <div class="template-name">Native agent definition</div>
+          <div class="template-tags">.claude/agents/ format · tools · model · effort · auto-delegation · global or per-project</div>
           <div class="btn-row">
-            <a href="files/CLAUDE.wordpress-tw.md" download class="btn btn-primary">↓ Download CLAUDE.md</a>
-          </div>
-        </div>
-
-        <div class="template-card">
-          <div class="template-name">Security Review</div>
-          <div class="template-tags">Static HTML · Bash deploy scripts · .htaccess · OWASP Top 10 · Read-only audit mode</div>
-          <div class="btn-row">
-            <a href="files/CLAUDE.security-review.md" download class="btn btn-primary">↓ Download CLAUDE.md</a>
-          </div>
-        </div>
-
-        <div class="template-card">
-          <div class="template-name">Prompt Engineer</div>
-          <div class="template-tags">Any domain · Sequential intake · Expert team assembly · Anti-hallucination</div>
-          <div class="btn-row">
-            <a href="files/CLAUDE.prompt-engineer.md" download class="btn btn-primary">↓ Download CLAUDE.md</a>
-          </div>
-        </div>
-
-        <div class="template-card">
-          <div class="template-name">Persona Builder</div>
-          <div class="template-tags">Expert team assembly · Collaboration patterns · Domain-agnostic · Role selection</div>
-          <div class="btn-row">
-            <a href="files/CLAUDE.persona-builder.md" download class="btn btn-primary">↓ Download CLAUDE.md</a>
-          </div>
-        </div>
-
-        <div class="template-card">
-          <div class="template-name">Native Agent Definition</div>
-          <div class="template-tags">.claude/agents/ format · Tool restrictions · Model routing · Auto-delegation · Global or per-project</div>
-          <div class="btn-row">
-            <a href="files/CLAUDE.agent-definition.md" download class="btn btn-primary">↓ Download template</a>
+            <a href="files/CLAUDE.agent-definition.md" download class="btn btn-primary">↓ Download</a>
           </div>
         </div>
 
         <div class="template-card">
           <div class="template-name">AGENTS.md</div>
-          <div class="template-tags">Cross-platform standard · Claude Code · GitHub Copilot · Cursor · Commands, boundaries, style</div>
+          <div class="template-tags">Cross-tool standard · commands · structure · code style · boundaries</div>
           <div class="btn-row">
-            <a href="files/AGENTS.md.template" download class="btn btn-primary">↓ Download template</a>
+            <a href="files/AGENTS.md.template" download class="btn btn-primary">↓ Download</a>
+          </div>
+        </div>
+
+        <div class="template-card">
+          <div class="template-name">Project context</div>
+          <div class="template-tags">Persona · required roles · architecture · current state · open questions</div>
+          <div class="btn-row">
+            <a href="files/CONTEXT.template.md" download class="btn btn-primary">↓ Download</a>
+          </div>
+        </div>
+
+        <div class="template-card">
+          <div class="template-name">WordPress dev bot</div>
+          <div class="template-tags">Underscores + Tailwind · local dev · pure PHP templates · junior-coder role</div>
+          <div class="btn-row">
+            <a href="files/CLAUDE.wordpress-tw.md" download class="btn btn-primary">↓ Download</a>
+          </div>
+        </div>
+
+        <div class="template-card">
+          <div class="template-name">Security review bot</div>
+          <div class="template-tags">Static HTML · deploy scripts · OWASP Top 10 · read-only audit mode</div>
+          <div class="btn-row">
+            <a href="files/CLAUDE.security-review.md" download class="btn btn-primary">↓ Download</a>
+          </div>
+        </div>
+
+        <div class="template-card">
+          <div class="template-name">Prompt engineer bot</div>
+          <div class="template-tags">Any domain · sequential intake · expert team assembly · anti-hallucination</div>
+          <div class="btn-row">
+            <a href="files/CLAUDE.prompt-engineer.md" download class="btn btn-primary">↓ Download</a>
+          </div>
+        </div>
+
+        <div class="template-card">
+          <div class="template-name">Persona builder bot</div>
+          <div class="template-tags">Expert team assembly · collaboration patterns · domain-agnostic · role selection</div>
+          <div class="btn-row">
+            <a href="files/CLAUDE.persona-builder.md" download class="btn btn-primary">↓ Download</a>
+          </div>
+        </div>
+
+        <div class="template-card">
+          <div class="template-name">Session checkpoint</div>
+          <div class="template-tags">Active task · files changed · blockers · next action — pairs with the SessionStart hook</div>
+          <div class="btn-row">
+            <a href="files/progress.md" download class="btn btn-primary">↓ Download</a>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- SUBAGENT RULES -->
-    <section class="doc-section" id="subagent-rules">
-      <h2 class="section-title">Subagent / Worktree Safety Rules</h2>
-      <p class="section-lead">When Claude spawns agents that use git worktrees, follow these rules to prevent silent failures.</p>
-      <div class="callout">
-        <div class="callout-label">Add to Global Rules</div>
-        <p>These rules belong in <code>~/.claude/CLAUDE.md</code> so every bot, in every project, follows them automatically — without needing them in each project config. See <a href="#global-rules">Global Rules</a> for the file format, or use the <a href="#setup">First Session Guide</a> which includes them in the template it creates.</p>
+    <!-- WORKFLOW -->
+    <section class="doc-section" id="workflow">
+      <h2 class="section-title">One Operator's Workflow</h2>
+      <p class="section-lead">How I actually run this day to day — one operator's setup, not requirements.</p>
+      <p>Everything above is meant to be true for anyone. The rest is not: worktree agent choreography, a session handoff ritual, a fixed agent roster, deploy ownership rules, the reporting block agents have to end with. It works well, and it is worth reading if you are building a routine of your own — but none of it is something Claude Code requires, and copying it wholesale into a different setup is how good ideas become cargo cult.</p>
+      <p>It is written up separately and labelled as opinion.</p>
+      <div class="btn-row">
+        <a href="workflow/" class="btn btn-primary">Read the personal runbook →</a>
+        <a href="files/MULTIAGENT.md" download class="btn btn-outline">↓ MULTIAGENT.md</a>
       </div>
-
-      <h3>Use absolute paths with <code>-C</code> — never <code>cd</code></h3>
-      <p>The working directory persists across bash calls. <code>cd</code> inside one call affects all subsequent calls in the session, causing git commands to target the wrong repo silently.</p>
-      <div class="code-block"># CORRECT — no CWD drift between bash calls
-git -C /absolute/path/to/repo status
-git -C /absolute/path/to/repo log --oneline -3
-
-# WRONG — cd persists; later git commands run against wrong directory
-cd /some/path &amp;&amp; git status</div>
-
-      <h3>Identify all git repos before delegating</h3>
-      <p>Subdirectories can have their own <code>.git</code> and are separate repos. Check:</p>
-      <div class="code-block shell">ls &lt;subdir&gt;/.git   # exists = separate repo</div>
-      <p>Tell the agent explicitly which git repo each file belongs to when multiple repos exist in the tree.</p>
-
-      <h3>After a worktree agent completes — merge explicitly</h3>
-      <p>Worktree agents commit to a temp branch, not main. Never assume the merge happened automatically.</p>
-      <div class="code-block">git -C /abs/path log --oneline worktree-branch -3   # verify commit is there
-git -C /abs/path merge worktree-branch --ff-only    # fast-forward into main
-git -C /abs/path log --oneline -3                   # confirm main now has it
-ls /abs/path/new-file                               # verify file is on disk</div>
-      <p><strong>Never assume "already up to date" means success</strong> — it may mean the merge ran against the wrong directory.</p>
-
-      <h3>Worktree failure modes</h3>
-      <p>Before trusting any agent result, run <code>git diff main..HEAD --stat</code> inside the worktree. Unexpected deletions of existing source files mean the agent worked on a stale base — do not merge.</p>
-      <div class="code-block"><strong>A — Stale base:</strong> worktree branched from an older commit.
-Symptom: git log --oneline -3 tops out before recent commits on main.
-Fix: git rebase main before merging.
-
-<strong>B — Out-of-lane edits:</strong> agent modified files outside its scope.
-Fix: cherry-pick only intended files, reject the rest.
-
-<strong>C — Uncommitted changes:</strong> git diff main..HEAD looks clean but git diff HEAD shows work.
-Fix: commit the unstaged work first, then merge.
-
-<strong>D — Duplicate declarations:</strong> stale base + symbol already committed on main.
-Symptom: runtime crash from duplicate const/function.
-Fix: run node --check &lt;file&gt; (or language equivalent) on all modified files before merging.</div>
-
-      <h3>Recovery steps</h3>
-      <div class="code-block">git log --oneline -3              # 1. Confirm worktree base commit
-git diff HEAD                     # 2. Find unstaged work — commit it
-git rebase main                   # 3. Rebase onto main, resolve conflicts
-# 4. Run syntax check on modified files
-git merge --no-commit --no-ff &lt;branch&gt;   # 5. Inspect staged diff before committing
-git diff --cached                 # 6. Final review — then commit</div>
-
-      <h3>Agent reporting — require a Shipping Status block</h3>
-      <p>Every worktree agent should end its final message with a Shipping Status block. Main session reads this to decide whether to deploy.</p>
-      <div class="code-block">## Shipping Status
-- Committed: yes | no — &lt;hash or "none"&gt;
-- Pushed to GitHub: yes | no
-- Deployed to server: yes | no
-- Deploy script used: yes | no</div>
-      <p><strong>Deploy ownership:</strong> agents commit and push only. The main session runs the deploy command — never the agent. Agents deploying independently bypass the review gate and can cause double-deploys.</p>
-    </section>
-
-    <!-- PRE-SHIP REVIEW -->
-    <section class="doc-section" id="ship-review">
-      <h2 class="section-title">Pre-ship Review Pattern</h2>
-      <p class="section-lead">Run a review skill automatically before committing to catch bugs before they ship.</p>
-
-      <div class="code-block">REVIEW=$(echo "$DIFF" | claude --print "$REVIEW_PROMPT")
-VERDICT=$(echo "$REVIEW" | head -1 | tr '[:lower:]' '[:upper:]')
-[ "$VERDICT" = "APPROVE" ] || read -p "Issues flagged. Ship anyway? (y/N): " CONFIRM</div>
-      <p>The <code>/ship-review</code> skill provides a ready-made review prompt for this pattern. Wire it into your deploy or commit script.</p>
     </section>
 
     <!-- ALL FILES -->
     <section class="doc-section" id="files">
       <h2 class="section-title">All Files</h2>
-      <p class="section-lead">Direct download links for everything in this hub.</p>
-      <table class="files-table">
-        <thead>
-          <tr>
-            <th>File</th>
-            <th>Description</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>FIRST-SESSION.md</td>
-            <td>First session setup guide — paste into Claude Code, Claude installs skills and sets up your config interactively</td>
-            <td><a href="files/FIRST-SESSION.md" download class="btn btn-outline btn-sm">↓</a></td>
-          </tr>
-          <tr>
-            <td>ONBOARDING.md</td>
-            <td>Reference guide — skills, bot templates, subagent safety rules, quickstart</td>
-            <td><a href="files/ONBOARDING.md" download class="btn btn-outline btn-sm">↓</a></td>
-          </tr>
-          <tr>
-            <td>install-skills.sh</td>
-            <td>Self-contained installer — registers the caveman plugin + installs all 4 hub skills. No repo clone required. Run directly or paste into Claude Code.</td>
-            <td><a href="files/install-skills.sh" download class="btn btn-outline btn-sm">↓</a></td>
-          </tr>
-          <tr>
-            <td>setup.sh</td>
-            <td>New machine installer — writes ~/.claude config + skill junctions (Windows only, via Git Bash; requires repo)</td>
-            <td><a href="files/setup.sh" download class="btn btn-outline btn-sm">↓</a></td>
-          </tr>
-          <tr>
-            <td>CLAUDE.wordpress-tw.md</td>
-            <td>WordPress Dev bot template</td>
-            <td><a href="files/CLAUDE.wordpress-tw.md" download class="btn btn-outline btn-sm">↓</a></td>
-          </tr>
-          <tr>
-            <td>CLAUDE.security-review.md</td>
-            <td>Security Review bot template</td>
-            <td><a href="files/CLAUDE.security-review.md" download class="btn btn-outline btn-sm">↓</a></td>
-          </tr>
-          <tr>
-            <td>CLAUDE.prompt-engineer.md</td>
-            <td>Prompt Engineer bot template — 5-phase prompt design for any domain</td>
-            <td><a href="files/CLAUDE.prompt-engineer.md" download class="btn btn-outline btn-sm">↓</a></td>
-          </tr>
-          <tr>
-            <td>CLAUDE.persona-builder.md</td>
-            <td>Persona Builder bot template — expert team assembly for any domain</td>
-            <td><a href="files/CLAUDE.persona-builder.md" download class="btn btn-outline btn-sm">↓</a></td>
-          </tr>
-          <tr>
-            <td>MULTIAGENT.md</td>
-            <td>Multiagent workflow decision guide — complexity ladder, token budget rules, worktree recovery, chaining patterns</td>
-            <td><a href="files/MULTIAGENT.md" download class="btn btn-outline btn-sm">↓</a></td>
-          </tr>
-          <tr>
-            <td>EFFICIENCY.md</td>
-            <td>Prompting and token economics — prompting advice that is now obsolete, how prompt caching works and what invalidates it, /rewind vs /compact vs /clear, cutting token use</td>
-            <td><a href="files/EFFICIENCY.md" download class="btn btn-outline btn-sm">↓</a></td>
-          </tr>
-          <tr>
-            <td>CLAUDE.agent-definition.md</td>
-            <td>Native agent definition template — .claude/agents/ format with tool restrictions, model routing, and auto-delegation instructions</td>
-            <td><a href="files/CLAUDE.agent-definition.md" download class="btn btn-outline btn-sm">↓</a></td>
-          </tr>
-          <tr>
-            <td>AGENTS.md.template</td>
-            <td>AGENTS.md standard template — cross-platform (Claude Code, Copilot, Cursor). Commands, structure, code style, git workflow, boundaries.</td>
-            <td><a href="files/AGENTS.md.template" download class="btn btn-outline btn-sm">↓</a></td>
-          </tr>
-          <tr>
-            <td>SESSION_CHECKLIST.md</td>
-            <td>Project session checklist — start, during, and end-of-session steps for any project bot</td>
-            <td><a href="files/SESSION_CHECKLIST.md" download class="btn btn-outline btn-sm">↓</a></td>
-          </tr>
-          <tr>
-            <td>BOT_RULES.md</td>
-            <td>Hard bot rules template — worktree safety, agent reporting, deploy ownership, self-cleanup. Drop in _SYSTEM/ and reference from CLAUDE.md.</td>
-            <td><a href="files/BOT_RULES.md" download class="btn btn-outline btn-sm">↓</a></td>
-          </tr>
-          <tr>
-            <td>CONTEXT.template.md</td>
-            <td>Project context template — persona, required roles, collaboration pattern, architecture, current state. Drop in _SYSTEM/ and fill in.</td>
-            <td><a href="files/CONTEXT.template.md" download class="btn btn-outline btn-sm">↓</a></td>
-          </tr>
-          <tr>
-            <td>progress.md</td>
-            <td>Session checkpoint template — bot writes active task state at end of session, reads it at start. Drop in docs/.</td>
-            <td><a href="files/progress.md" download class="btn btn-outline btn-sm">↓</a></td>
-          </tr>
-        </tbody>
-      </table>
+      <p class="section-lead">Everything published here, with direct download links.</p>
+      <div class="table-wrap">
+        <table class="files-table">
+          <thead>
+            <tr><th>File</th><th>Description</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>EFFICIENCY.md</td>
+              <td>Prompting and token economics — stale prompting advice, how the cache works and what invalidates it, /rewind vs /compact vs /clear, cutting token use</td>
+              <td><a href="files/EFFICIENCY.md" download class="btn btn-outline btn-sm">↓</a></td>
+            </tr>
+            <tr>
+              <td>MULTIAGENT.md</td>
+              <td>Multiagent decision guide — complexity ladder, delegation patterns, worktree recovery, agent chaining</td>
+              <td><a href="files/MULTIAGENT.md" download class="btn btn-outline btn-sm">↓</a></td>
+            </tr>
+            <tr>
+              <td>FIRST-SESSION.md</td>
+              <td>Paste into Claude Code and say "read this and follow it" — walks you through creating global rules and installing skills interactively</td>
+              <td><a href="files/FIRST-SESSION.md" download class="btn btn-outline btn-sm">↓</a></td>
+            </tr>
+            <tr>
+              <td>ONBOARDING.md</td>
+              <td>Reference guide — skills table, templates, subagent safety, quickstart. Readable in Claude Code or any AI chat.</td>
+              <td><a href="files/ONBOARDING.md" download class="btn btn-outline btn-sm">↓</a></td>
+            </tr>
+            <tr>
+              <td>install-skills.sh</td>
+              <td>Self-contained installer — registers the third-party caveman plugin and writes this hub's four skills. No repository clone required.</td>
+              <td><a href="files/install-skills.sh" download class="btn btn-outline btn-sm">↓</a></td>
+            </tr>
+            <tr>
+              <td>CLAUDE.agent-definition.md</td>
+              <td>Subagent definition template — .claude/agents/ format with tools, model, effort, and auto-delegation description</td>
+              <td><a href="files/CLAUDE.agent-definition.md" download class="btn btn-outline btn-sm">↓</a></td>
+            </tr>
+            <tr>
+              <td>AGENTS.md.template</td>
+              <td>AGENTS.md standard template — cross-tool. Commands, structure, code style, git workflow, boundaries.</td>
+              <td><a href="files/AGENTS.md.template" download class="btn btn-outline btn-sm">↓</a></td>
+            </tr>
+            <tr>
+              <td>CONTEXT.template.md</td>
+              <td>Project context template — persona, roles, collaboration pattern, architecture, current state</td>
+              <td><a href="files/CONTEXT.template.md" download class="btn btn-outline btn-sm">↓</a></td>
+            </tr>
+            <tr>
+              <td>BOT_RULES.md</td>
+              <td>Hard rules template — worktree safety, agent reporting, deploy ownership, self-cleanup</td>
+              <td><a href="files/BOT_RULES.md" download class="btn btn-outline btn-sm">↓</a></td>
+            </tr>
+            <tr>
+              <td>SESSION_CHECKLIST.md</td>
+              <td>Session checklist — start, during, and end-of-session steps</td>
+              <td><a href="files/SESSION_CHECKLIST.md" download class="btn btn-outline btn-sm">↓</a></td>
+            </tr>
+            <tr>
+              <td>progress.md</td>
+              <td>Session checkpoint template — active task state written at session end, read at session start</td>
+              <td><a href="files/progress.md" download class="btn btn-outline btn-sm">↓</a></td>
+            </tr>
+            <tr>
+              <td>CLAUDE.wordpress-tw.md</td>
+              <td>Bot template — WordPress + Tailwind development</td>
+              <td><a href="files/CLAUDE.wordpress-tw.md" download class="btn btn-outline btn-sm">↓</a></td>
+            </tr>
+            <tr>
+              <td>CLAUDE.security-review.md</td>
+              <td>Bot template — read-only security audit mode</td>
+              <td><a href="files/CLAUDE.security-review.md" download class="btn btn-outline btn-sm">↓</a></td>
+            </tr>
+            <tr>
+              <td>CLAUDE.prompt-engineer.md</td>
+              <td>Bot template — five-phase prompt design for any domain</td>
+              <td><a href="files/CLAUDE.prompt-engineer.md" download class="btn btn-outline btn-sm">↓</a></td>
+            </tr>
+            <tr>
+              <td>CLAUDE.persona-builder.md</td>
+              <td>Bot template — expert team assembly for any domain</td>
+              <td><a href="files/CLAUDE.persona-builder.md" download class="btn btn-outline btn-sm">↓</a></td>
+            </tr>
+            <tr>
+              <td>setup.sh</td>
+              <td><strong>Windows only</strong> (Git Bash), <strong>and it must live inside a repo that already has <code>.agents/skills/</code></strong> — the junctions it creates point at siblings of the script, so a standalone download fails at the link step, after the config files have been written. It refuses to run on macOS or Linux. On any platform, install-skills.sh plus a hand-written CLAUDE.md is the portable equivalent.</td>
+              <td><a href="files/setup.sh" download class="btn btn-outline btn-sm">↓</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">Notes</div>
+        <p><strong>setup.sh is Windows only.</strong> It writes into <code>~/.claude/</code>, so back up an existing <code>settings.json</code> and <code>CLAUDE.md</code> before running it. On macOS and Linux, install-skills.sh plus a hand-written <code>CLAUDE.md</code> is the equivalent, and is what the rest of this guide assumes.</p>
+        <p>A machine-readable index of this hub is at <a href="llms.txt">llms.txt</a>.</p>
+      </div>
     </section>
 
-    <footer>Internal use only · Not indexed · AI Hub</footer>
+    <footer>Publicly readable and reusable · deliberately not search-indexed · AI Hub</footer>
 
   </main>
 
   <script>
-
-    function copyOnboarding(btn) {
-      fetch('files/ONBOARDING.md')
-        .then(r => r.text())
-        .then(text => {
-          navigator.clipboard.writeText(text).then(() => {
-            const orig = btn.textContent;
-            btn.textContent = '✓ Copied';
-            btn.classList.add('copied');
-            setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 2000);
-          }).catch(() => {});
-        })
-        .catch(() => {
-          btn.textContent = 'Error — try download';
-          setTimeout(() => { btn.textContent = '⎘ Copy text'; }, 2500);
-        });
-    }
-
     function copyTrigger(trigger, btn) {
       navigator.clipboard.writeText(trigger).then(() => {
         const orig = btn.textContent;
@@ -1482,9 +1672,20 @@ VERDICT=$(echo "$REVIEW" | head -1 | tr '[:lower:]' '[:upper:]')
       });
     });
 
+    // Mobile nav
+    const sidebar = document.getElementById('sidebar');
+    const navToggle = document.getElementById('navToggle');
+    navToggle.addEventListener('click', () => {
+      const open = sidebar.classList.toggle('nav-open');
+      navToggle.setAttribute('aria-expanded', String(open));
+    });
+
     // Sidebar active nav highlighting on scroll
-    const sections = document.querySelectorAll('.doc-section');
     const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(l => l.addEventListener('click', () => {
+      sidebar.classList.remove('nav-open');
+      navToggle.setAttribute('aria-expanded', 'false');
+    }));
 
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -1496,7 +1697,7 @@ VERDICT=$(echo "$REVIEW" | head -1 | tr '[:lower:]' '[:upper:]')
       });
     }, { rootMargin: '-20% 0px -70% 0px' });
 
-    sections.forEach(s => observer.observe(s));
+    document.querySelectorAll('.doc-section').forEach(s => observer.observe(s));
   </script>
 </body>
 </html>

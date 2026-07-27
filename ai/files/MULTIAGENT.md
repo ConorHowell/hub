@@ -141,7 +141,7 @@ Save the workflow file to /path/to/project/workflows/
 Apply these at every level.
 
 ### CLAUDE.md files
-- Keep under 2k tokens. Pointers to skill files, not content.
+- Aim to keep under ~200 lines. Pointers to skill files, not content.
 - No code examples inline — reference file paths instead.
 - `.claudeignore`: exclude `node_modules/`, `.next/`, `dist/`, `build/`, `*.lock`
 
@@ -151,8 +151,9 @@ Apply these at every level.
 - Group related questions into one message — each round-trip costs a full context read
 
 ### Context management
-- `/compact` after any exploration phase — before you start building
-- `/clear` when switching to an unrelated task
+- `/clear` when switching to an unrelated task — it costs nothing
+- `/rewind` to abandon a path that went wrong — that prefix is still cached
+- `/compact` only when one long task actually overflows the window. Not on a schedule, not at a fixed percentage — generating the summary costs money. See `EFFICIENCY.md`
 - Set effort at session START, not mid-task — effort is part of the cache key, so `/effort` mid-session recomputes the whole conversation. For mechanical work, delegate to a subagent with `effort: low` in its frontmatter instead.
 - `/context` to audit what's eating your window if sessions feel heavy
 
@@ -168,7 +169,6 @@ Apply these at every level.
 ### Session memory
 - End of session: write checkpoint to `docs/progress.md`
 - Start of session: load `@CLAUDE.md` + `@docs/progress.md` only — nothing else until needed
-- Mid-session: `/compact` every ~40 messages or after any large exploration
 
 ---
 
@@ -181,57 +181,33 @@ An agent picking up a workflow should check context pressure and adapt:
 - Everything else → cavecrew or subagent
 
 **Heavy (mid/late session):**
-- `/compact` immediately after any exploration phase
 - All reads → subagent
 - Prefer `cavecrew-builder` over inline edits (smaller tool results)
 - Finish current atomic task cleanly; don't start the next one
 
 **Near limit:**
-- `/compact` now, before anything else
+- `/compact` now — this is the case it exists for
 - Complete only the current atomic task
 - Write checkpoint to `docs/progress.md`
 - Surface to user — don't attempt another task
 
 ---
 
-## Worktree Recovery
+## Worktree Agents
 
-> Run this check before trusting any worktree agent result: `git diff main..HEAD --stat`. Unexpected `-` lines on source files = agent worked on stale base. Do not merge.
-
-### Failure Modes
-
-**A — Stale base:** Worktree branched from an older commit. Check: `git log --oneline -3` in worktree tops out before recent commits on main. Fix: rebase before merging.
-
-**B — Out-of-lane edits:** Agent modified files outside its assigned scope. Fix: cherry-pick only the intended files, reject the rest.
-
-**C — Uncommitted changes:** `git diff main..HEAD` looks clean but `git diff HEAD` shows modifications — agent left work unstaged. Fix: commit the unstaged work first.
-
-**D — Duplicate declarations:** Stale base + symbol already committed on main → duplicate `const`/`function`. Causes runtime crash. Fix: run `node --check <file>` (or language equivalent) on all modified files before merging.
-
-### Recovery Steps
+**Pre-flight — the one that prevents the rest.** Before spawning a worktree agent:
 
 ```bash
-git log --oneline -3          # 1. Confirm base commit
-git diff HEAD                 # 2. Find any uncommitted work — commit it
-git rebase main               # 3. Rebase onto main, resolve conflicts
-# 4. Run syntax check on modified files (node --check, python -m py_compile, etc.)
-git merge --no-commit --no-ff <branch>   # 5. Inspect staged diff before committing
-git diff --cached             # 6. Final review — then commit
+git rev-list --count origin/main..main   # must print 0
 ```
 
-### Agent Reporting Protocol
+Worktree agents branch from `origin/main` — the last **pushed** commit — not local `HEAD`. With unpushed commits on `main`, the agent's branch does not contain them, so its diff reads as deletions of your own work and merging it phantom-reverts them. Push first, or run the agent on the main tree without worktree isolation.
 
-Every worktree agent must end with a **Shipping Status block** — main thread reads this to decide next action:
+**Before merging any agent result:** `git diff main..<branch> --stat`. Unexpected `-` lines on source files = stale base. Do not merge; rebase first. Syntax-check every modified file (`node --check`, `python -m py_compile`, `bash -n`) — a stale base plus a symbol already on `main` produces a duplicate declaration that no merge conflict warns about.
 
-```
-## Shipping Status
-- Committed: yes | no — <hash or "none">
-- Pushed to GitHub: yes | no
-- Deployed to server: yes | no
-- Deploy script used: yes | no
-```
+**Deploy ownership:** draw a hard line at the deploy. Agents edit and report; the main thread runs the deploy script — never the agent, because agent-initiated deploys bypass the pre-ship review gate and can double-deploy. Whether agents also commit and push, or stop before that, is your call — pick one and state it in the agent's prompt. Every agent ends with a **Shipping Status block** the main thread reads to decide the next action.
 
-**Deploy ownership:** agents commit + push only. Main thread runs your deploy script — never the agent. Agents deploying independently bypass the ship-review gate and can cause double-deploys.
+Full choreography, all four failure modes, the recovery sequence, and the Shipping Status format: **`workflow/` on the AI hub**.
 
 ### Long-running agent tasks — spec-file pattern
 

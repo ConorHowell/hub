@@ -5,7 +5,8 @@
 - [ ] Add deploy slug + live URL to `CLAUDE.md` Quick Start
 - [ ] Populate Key Files table
 - [ ] Delete placeholder comment lines when sections are filled
-- [ ] Run `/init` to verify Claude Code picks up CLAUDE.md
+- [ ] No CLAUDE.md yet? Run `/init` — it generates one from the codebase
+- [ ] Run `/context` to confirm the CLAUDE.md actually loaded
 - [ ] `git init` in your hub/workspace directory (enables worktrees for future sessions)
 
 ## Session Start
@@ -20,12 +21,11 @@
 - [ ] Complex decision? Ask: alternatives + edge cases
 - [ ] UI work: paste screenshot, not description
 - [ ] Frontend bug: paste DevTools console error directly
-- [ ] Context ~60% full? `/compact` now — don't wait for auto-compact. `/context` shows context usage, `/usage` shows cost.
+- [ ] Session feeling heavy? `/context` shows what's using the window, `/usage` shows cost. `/compact` only when one long task actually overflows — see `EFFICIENCY.md`
 
 ## End of Session
 - [ ] Overwrite `docs/progress.md` with active state (task, changed files, blockers, next action, completed + remaining tasks)
 - [ ] Update `_SYSTEM/CONTEXT.md` in-place if architecture/state changed (bump version)
 - [ ] New pattern or gotcha discovered? Add to `_SYSTEM/CONTEXT.md` Known Gotchas
 - [ ] Run `git worktree prune`
-- [ ] Delete any `/tmp` files created this session
-- [ ] `/compact` before closing — next session starts lean
+- [ ] Delete any temp files created this session

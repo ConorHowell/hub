@@ -1,9 +1,47 @@
 #!/usr/bin/env bash
+#
+# Windows (Git Bash) only, and it must sit INSIDE a repo that already has
+# .agents/skills/ — the skill links point at siblings of this script. Downloading it
+# on its own will fail at the link step, after the config files have been written.
+# If you just want skills, use install-skills.sh instead: it works anywhere and
+# needs no repo.
+#
+# It also enables the third-party `caveman` plugin from github.com/JuliusBrussee/caveman
+# (not Anthropic). Plugin skills and hooks run in your session with your privileges.
+# Read it before running this, or delete the enabledPlugins block below.
 set -euo pipefail
 REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+# ── OS guard ──────────────────────────────────────────────────
+# This script is Windows/Git-Bash only: it uses $USERPROFILE for the home
+# directory and `mklink /J` for the skill links. Neither exists elsewhere.
+if [ -z "${USERPROFILE:-}" ] || ! command -v cmd >/dev/null 2>&1; then
+  echo "setup.sh is for Windows (Git Bash) only." >&2
+  echo "" >&2
+  echo "On macOS or Linux, do the same three things by hand:" >&2
+  echo "  1. Write your rules to ~/.claude/CLAUDE.md" >&2
+  echo "  2. Write your hooks to ~/.claude/settings.json" >&2
+  echo "  3. Symlink each skill:  ln -sfn <skill-source-dir> ~/.claude/skills/<name>" >&2
+  echo "" >&2
+  echo "Or run install-skills.sh, which handles step 3 on every platform." >&2
+  exit 1
+fi
+
 CLAUDE_DIR="$USERPROFILE/.claude"   # Git Bash exposes $USERPROFILE for Windows home
 
 mkdir -p "$CLAUDE_DIR"
+
+# ── Back up anything we are about to overwrite ────────────────
+# `cat >` destroys an existing global config silently. Keep a timestamped copy.
+backup() {
+  [ -f "$1" ] || return 0
+  local dest="$1.backup.$(date '+%Y%m%d-%H%M%S')"
+  cp "$1" "$dest"
+  echo "  backed up: $dest"
+}
+
+backup "$CLAUDE_DIR/CLAUDE.md"
+backup "$CLAUDE_DIR/settings.json"
 
 # ── Global CLAUDE.md ──────────────────────────────────────────
 cat > "$CLAUDE_DIR/CLAUDE.md" << 'EOF'
@@ -34,7 +72,7 @@ cat > "$CLAUDE_DIR/CLAUDE.md" << 'EOF'
 - Keep the main thread at high effort; push cheap work to subagents with their own model in frontmatter.
 
 ## Session Start
-- At the start of every session, activate caveman mode by invoking the /caveman skill before your first response.
+- Read any project handoff notes before starting work, and write them back at session end.
 EOF
 
 # ── settings.json ─────────────────────────────────────────────
@@ -57,7 +95,7 @@ cat > "$CLAUDE_DIR/settings.json" << 'EOF'
         "hooks": [
           {
             "type": "command",
-            "command": "echo '{\"systemMessage\": \"Auto-compacting: preserve active task state, open file paths, data correctness rules, any bugs under investigation, and all project constraints from CLAUDE.md.\"}'"
+            "command": "printf '{\"hookSpecificOutput\":{\"hookEventName\":\"PreCompact\",\"additionalContext\":\"PRESERVE DURING COMPACTION: active task state, open file paths, data correctness rules, any bugs under investigation, and all project constraints from CLAUDE.md.\"}}'"
           }
         ]
       }
@@ -65,7 +103,7 @@ cat > "$CLAUDE_DIR/settings.json" << 'EOF'
   },
   "statusLine": {
     "type": "command",
-    "command": "printf '%s | auto-compact ON | /compact to compact now | /clear between tasks' \"$(date '+%H:%M')\""
+    "command": "printf '%s | /context to inspect | /clear between tasks | /rewind to undo' \"$(date '+%H:%M')\""
   },
   "extraKnownMarketplaces": {
     "caveman": {

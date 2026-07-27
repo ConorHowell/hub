@@ -84,8 +84,7 @@ Deliver:
 
 ---
 
-## Reference Files (if available in project)
+## Reference
 
-- `framework/principles.md` — universal prompting principles + anti-patterns
-- `framework/prompt-template.md` — copy-paste XML template
-- `personas/guide.md` — persona selection logic + worked examples
+For current prompting guidance — what still works, and the older advice that now costs tokens or
+errors outright — see `EFFICIENCY.md` in this hub.

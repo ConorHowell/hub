@@ -16,60 +16,35 @@
 
 ## Worktree Safety Protocol
 
-> **HARD RULE: Before merging any agent result, run `git diff main..HEAD --stat` inside the worktree. Unexpected deletions of existing source files = agent worked on stale base. Do not merge — rebase first.**
+> **HARD RULE: before spawning a worktree agent, `git rev-list --count origin/main..main` must print `0`.** Worktree agents branch from `origin/main` — the last *pushed* commit — not local `HEAD`. Unpushed commits mean the agent starts on a stale base and its diff reads as deletions of your own work.
 
-### Known Failure Modes
+> **HARD RULE: before merging any agent result, run `git diff main..<branch> --stat`.** Unexpected deletions of existing source files = stale base. Do not merge — rebase first.
 
-**A — Stale base:** Worktree branches from an older commit. Symptom: `git log --oneline -3` in worktree tops out before recent commits. Check `git diff main..HEAD --stat` for unexpected `-` lines on source files.
-
-**B — Out-of-lane edits:** Agent modifies files outside its assigned scope. Reject those changes before merging.
-
-**C — Uncommitted changes:** Agent leaves work unstaged — `git diff main..HEAD` looks clean but `git diff HEAD` shows modifications. Always check both.
-
-**D — Duplicate declarations:** Stale base + symbol already committed on main → duplicate `const`. Causes runtime crash. Check with `node --check <file>` for JS projects.
-
-### Recovery Steps
-
-1. `git log --oneline -3` in worktree — confirm base commit
-2. `git diff HEAD` — commit any uncommitted work first
-3. `git rebase main` — resolve conflicts (keep both when in doubt)
-4. Run project-specific syntax check on all modified files
-5. `git merge --no-commit --no-ff <branch>` → inspect staged diff → commit
+Full choreography, the four known failure modes, and the recovery sequence: **`workflow/` on the AI hub**.
 
 ---
 
 ## Agent Reporting Protocol
 
-> **HARD RULE: Every worktree agent MUST end its final message with a Shipping Status block.**
-
-```
-## Shipping Status
-- Committed: yes | no — <commit hash or "none">
-- Pushed to GitHub: yes | no
-- Deployed to server: yes | no
-- Deploy script used: yes | no
-```
-
-"Done" or a summary table without this block is not sufficient. Main session reads this to decide next action.
+> **HARD RULE: every worktree agent MUST end its final message with a Shipping Status block.** "Done", or a summary table without the block, is not sufficient — the main session reads the block to decide the next action. Format: `workflow/` on the AI hub.
 
 ---
 
 ## Deploy Ownership
 
-> **HARD RULE: Worktree agents do NOT deploy to the server.**
+> **HARD RULE: worktree agents do NOT deploy.**
 
-**Agent responsibility:** edit files → commit → push → stop.
+**Agent:** edit files → list what changed → stop. Does not commit, push, or deploy.
+**Main session:** read the Shipping Status block → review the diff → commit, push, run the deploy script.
 
-**Main session responsibility:** read Shipping Status block → if "Deployed: no" → run your deploy script for that project.
-
-Rationale: only the main session has full context of what was shipped. Agent-initiated deploys cause double-deploys and bypass the ship-review gate.
+Rationale: only the main session knows the full set of what is shipping, and agent-initiated deploys bypass the pre-ship review gate.
 
 ---
 
 ## Session Hygiene
 
-- `/compact` around 60% context — don't wait for auto-compact.
 - `/clear` when switching to an unrelated task.
+- `/compact` only when one long task actually overflows the window — see `EFFICIENCY.md`.
 - Never paste raw logs into the main thread — subagent or summarize first.
 
 ---
@@ -89,5 +64,5 @@ Rationale: only the main session has full context of what was shipped. Agent-ini
 
 - `git worktree prune` before closing.
 - Delete all `/tmp` files created this session.
-- Never leave uncommitted changes in a worktree branch — commit + push or discard.
+- Never leave a worktree branch with uncommitted changes — merge it or discard it before closing.
 - Leftover worktrees slow future bots and pollute `git worktree list`.
