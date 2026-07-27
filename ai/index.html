@@ -629,13 +629,13 @@
       filter: drop-shadow(0 0 20px rgba(240,168,48,0.25));
     }
     .auth-card p { font-size: .8rem; color: #4a5472; margin: 0; }
-    .auth-card input[type="password"] {
+    .auth-card input[type="password"], .auth-card input[type="email"] {
       width: 100%; padding: .65rem .85rem;
       background: #04040d; border: 1px solid rgba(160,170,220,0.15);
       border-radius: 6px; color: #c0cce8; font-size: .9rem; outline: none;
       transition: border-color .2s;
     }
-    .auth-card input[type="password"]:focus { border-color: rgba(240,168,48,0.55); }
+    .auth-card input[type="password"]:focus, .auth-card input[type="email"]:focus { border-color: rgba(240,168,48,0.55); }
     .auth-unlock-btn {
       padding: .65rem 1.5rem; background: #f0a830; color: #04040d;
       border: none; border-radius: 6px;
@@ -660,28 +660,38 @@
 <body>
   <script>
     (function() {
-      var HASH = 'e47337cad53bb366c8544010832cbdb87c53ab7845773aa4621668f0eb3d2b5a';
-      var KEY  = 'hh_auth';
-      var TTL  = 86400000;
+      // Gate on the shared Hub PocketBase session, not a page-local password.
+      // Signing in anywhere in the Hub (the same session the sync uses) unlocks this page
+      // with no prompt. Nothing here is secret — this keeps the page tidy for one operator,
+      // it is not an access control.
+      var AUTH_KEY = 'pocketbase_auth';
+      var PB = 'https://chportfolio.us/pb';
 
-      function isAuthed() {
+      function storedToken() {
         try {
-          var stored = sessionStorage.getItem(KEY);
-          if (!stored) return false;
-          var data = JSON.parse(stored);
-          return data.hash === HASH && (Date.now() - data.timestamp) < TTL;
-        } catch(e) { return false; }
+          var raw = localStorage.getItem(AUTH_KEY);
+          if (!raw) return null;
+          var data = JSON.parse(raw);
+          return data && data.token ? data.token : null;
+        } catch (e) { return null; }
       }
 
-      if (isAuthed()) return;
+      function saveAuth(data) {
+        localStorage.setItem(AUTH_KEY, JSON.stringify({ token: data.token, record: data.record }));
+      }
 
-      function sha256(str) {
-        return crypto.subtle.digest('SHA-256', new TextEncoder().encode(str))
-          .then(function(buf) {
-            return Array.from(new Uint8Array(buf))
-              .map(function(b) { return b.toString(16).padStart(2,'0'); })
-              .join('');
-          });
+      // A token in localStorage is a claim, not proof — the server decides.
+      function verify(token) {
+        return fetch(PB + '/api/collections/users/auth-refresh', {
+          method: 'POST',
+          headers: { 'Authorization': token }
+        }).then(function (res) {
+          if (!res.ok) return false;
+          return res.json().then(function (data) { saveAuth(data); return true; });
+        }).catch(function () {
+          // Offline is not "signed out" — don't lock someone out of a docs page over a flaky network.
+          return true;
+        });
       }
 
       function showOverlay() {
@@ -690,46 +700,61 @@
         overlay.innerHTML =
           '<div class="auth-card" id="auth-card">' +
             '<h2>AI HUB</h2>' +
-            '<p>Enter your password to continue</p>' +
+            '<p>Sign in with your Hub account</p>' +
+            '<input type="email" id="auth-email" placeholder="Email" autocomplete="username" />' +
             '<input type="password" id="auth-input" placeholder="Password" autocomplete="current-password" />' +
-            '<button class="auth-unlock-btn" id="auth-submit">Unlock</button>' +
+            '<button class="auth-unlock-btn" id="auth-submit">Sign in</button>' +
             '<div class="auth-error" id="auth-error"></div>' +
           '</div>';
         document.body.appendChild(overlay);
 
+        var email = document.getElementById('auth-email');
         var input = document.getElementById('auth-input');
         var btn   = document.getElementById('auth-submit');
         var err   = document.getElementById('auth-error');
         var card  = document.getElementById('auth-card');
 
-        input.focus();
+        email.focus();
+
+        function fail(msg) {
+          err.textContent = msg;
+          card.classList.remove('auth-shake');
+          void card.offsetWidth;
+          card.classList.add('auth-shake');
+          input.value = '';
+          input.focus();
+        }
 
         function attempt() {
-          var val = input.value;
-          if (!val) return;
-          sha256(val).then(function(hash) {
-            if (hash === HASH) {
-              sessionStorage.setItem(KEY, JSON.stringify({ hash: hash, timestamp: Date.now() }));
-              overlay.remove();
-            } else {
-              err.textContent = 'Incorrect password';
-              card.classList.remove('auth-shake');
-              void card.offsetWidth;
-              card.classList.add('auth-shake');
-              input.value = '';
-              input.focus();
-            }
-          });
+          if (!email.value.trim() || !input.value) return;
+          btn.disabled = true;
+          fetch(PB + '/api/collections/users/auth-with-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ identity: email.value.trim(), password: input.value })
+          }).then(function (res) {
+            if (!res.ok) { fail('Incorrect email or password'); return; }
+            return res.json().then(function (data) { saveAuth(data); overlay.remove(); });
+          }).catch(function () {
+            fail('Network error — try again');
+          }).then(function () { btn.disabled = false; });
         }
 
         btn.addEventListener('click', attempt);
-        input.addEventListener('keydown', function(e) { if (e.key === 'Enter') attempt(); });
+        email.addEventListener('keydown', function (e) { if (e.key === 'Enter') input.focus(); });
+        input.addEventListener('keydown', function (e) { if (e.key === 'Enter') attempt(); });
+      }
+
+      function gate() {
+        var token = storedToken();
+        if (!token) { showOverlay(); return; }
+        verify(token).then(function (ok) { if (!ok) showOverlay(); });
       }
 
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', showOverlay);
+        document.addEventListener('DOMContentLoaded', gate);
       } else {
-        showOverlay();
+        gate();
       }
     })();
   </script>
