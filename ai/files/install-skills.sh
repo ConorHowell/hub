@@ -33,7 +33,8 @@
 set -euo pipefail
 
 DIR="${HOME}/.agents/skills"
-mkdir -p "$DIR"
+LINK_DIR="${HOME}/.claude/skills"
+mkdir -p "$DIR" "$LINK_DIR"
 
 # ── Caveman plugin ────────────────────────────────────────────────────────────
 
@@ -161,12 +162,18 @@ name: ship-review
 description: >
   Pre-ship code reviewer for the static HTML/CSS/JS deployment pipeline.
   Reviews a git diff before it ships. Outputs APPROVE or FLAG on line 1,
-  then a concise bullet list of issues. Use when running publish.sh or
+  then a concise bullet list of issues. Use when running your deploy script or
   manually reviewing a diff before shipping. Trigger: /ship-review,
   "review before ship", "pre-ship check".
 ---
 
-You are a pre-ship reviewer for a static HTML/CSS/JS website, or a Next.js/TypeScript/React project. Review the git diff for:
+You are a pre-ship reviewer for a static HTML/CSS/JS website, or a Next.js/TypeScript/React project.
+
+Flag only issues that affect correctness or the stated intent of the commit. A clean diff gets `APPROVE` and nothing else — inventing findings to look thorough trains the reader to ignore real ones.
+
+Never assert that a tool's command, flag, or API does not exist based on recall. Fast-moving CLIs add and rename commands constantly, and training data goes stale — a confident "that isn't a real command" is a false positive that costs a ship cycle. If something looks wrong, write it as a question to verify against the official reference, not as a defect.
+
+Review the git diff for:
 
 1. HTML structure errors — unclosed tags, invalid nesting, duplicate IDs
 2. Broken internal links — hrefs referencing files not in the diff or known to exist
@@ -341,10 +348,21 @@ for skill in "${INSTALL[@]}"; do
   fi
   mkdir -p "$DIR/$skill"
   "$fn"
-  if npx skills add "$DIR/$skill" -a claude-code -y 2>/dev/null; then
+  # Symlink, never copy — a copied skill drifts from its source and you end up
+  # silently running an old version.
+  # `ln -sfn` replaces a symlink but NESTS inside a real directory, exiting 0. Anyone
+  # upgrading from a copy-based install already has a real dir here, so without this
+  # guard the link lands at <name>/<name> and the stale copy keeps loading — the exact
+  # drift this script exists to prevent.
+  if [ -e "$LINK_DIR/$skill" ] && [ ! -L "$LINK_DIR/$skill" ]; then
+    echo "  ✗ $skill — $LINK_DIR/$skill is a real directory (an older copy-based install)."
+    echo "      Remove it first:  rm -rf \"$LINK_DIR/$skill\"   — then re-run this script."
+    continue
+  fi
+  if ln -sfn "$DIR/$skill" "$LINK_DIR/$skill"; then
     echo "  ✓ $skill"
   else
-    echo "  ✗ $skill — registration failed (is Claude Code installed?)"
+    echo "  ✗ $skill — registration failed (could not link into $LINK_DIR)"
   fi
 done
 
@@ -353,4 +371,5 @@ echo "Done. Restart Claude Code — type /caveman or any skill trigger to verify
 echo ""
 echo "Note: deploy-check and security-check are not included — they require"
 echo "project-specific server paths, slugs, and file references. Write them"
-echo "from scratch using the SKILL.md format: https://chportfolio.us/hub/ai/#write-skill"
+echo "from scratch using the SKILL.md format — see the \"Write Your Own Skill\""
+echo "section of the AI hub you downloaded this script from."

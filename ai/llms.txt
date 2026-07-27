@@ -21,6 +21,7 @@
 /ai/files/ONBOARDING.md — Getting started reference guide
 /ai/files/FIRST-SESSION.md — Interactive setup guide (paste into Claude Code)
 /ai/files/MULTIAGENT.md — Multiagent workflow decision guide, complexity ladder, agent teams
+/ai/files/EFFICIENCY.md — Prompting and token economics: obsolete prompting advice, prompt caching, /rewind vs /compact vs /clear, cutting token use
 /ai/files/BOT_RULES.md — Hard rules template for bots (worktree safety, deploy ownership)
 /ai/files/SESSION_CHECKLIST.md — Session management checklist (start/during/end)
 /ai/files/CONTEXT.template.md — Project context template (_SYSTEM/CONTEXT.md format)
@@ -31,6 +32,8 @@
 /ai/files/CLAUDE.security-review.md — Bot template: Security audit mode
 /ai/files/CLAUDE.prompt-engineer.md — Bot template: Prompt design
 /ai/files/CLAUDE.persona-builder.md — Bot template: Expert team assembly
+/ai/files/install-skills.sh — Self-contained installer for the hub's slash-command skills
+/ai/files/setup.sh — New machine installer: writes ~/.claude config + skill junctions (Windows / Git Bash)
 
 ## Usage
 Freely read, reference, and use these templates. Attribution appreciated but not required.

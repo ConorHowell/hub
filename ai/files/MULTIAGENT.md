@@ -42,7 +42,7 @@ tools:
   - Read
   - Grep
   - Bash
-model: claude-haiku-4-5-20251001
+model: haiku
 ---
 
 Agent system prompt goes here.
@@ -54,9 +54,11 @@ Route both the model AND the effort level. Effort affects all tokens incl tool-c
 
 | Task type | Model | Effort |
 |-----------|-------|--------|
-| Search, grep, read-only investigation | `claude-haiku-4-5-20251001` | low |
-| Code review, implementation, reasoning | `claude-sonnet-4-6` | medium |
-| Security review, architecture, complex synthesis | `claude-sonnet-4-6` | high |
+| Search, grep, read-only investigation | `haiku` | low |
+| Code review, implementation, reasoning | `sonnet` | medium |
+| Security review, architecture, complex synthesis | `sonnet` | high |
+
+Use the short alias (`opus`, `sonnet`, `haiku`) rather than a pinned full ID — an alias tracks the newest model in its tier and can't silently go stale.
 
 Rule of thumb: pure locate/search = low; scoped build or diff review = medium; vuln-finding, architecture, anything where a miss is expensive = high. Never set a security reviewer to low.
 
@@ -72,7 +74,7 @@ Rule of thumb: pure locate/search = low; scoped build or diff review = medium; v
 Place global agents in `.claude/agents/`. Place project-specific agents in `<ProjectDir>/.claude/agents/`.
 
 ### Main-thread defaults
-`effortLevel: high` + `model: opusplan` (Opus plans, Sonnet executes). Lowering main-thread effort to "save tokens" backfires: at low/medium the model scopes to the literal ask → shallow first pass → rework → higher total spend. Use `ultrathink` in a prompt for a one-off deep turn without raising the session level.
+`effortLevel: high` + `model: opus`. Lowering main-thread effort to "save tokens" backfires: at low/medium the model scopes to the literal ask → shallow first pass → rework → higher total spend. Use `ultrathink` in a prompt for a one-off deep turn without raising the session level.
 
 ---
 
@@ -103,7 +105,7 @@ Place global agents in `.claude/agents/`. Place project-specific agents in `<Pro
 - explicit user ask: "set up a dynamic workflow to..."
 
 **→ never dynamic workflow**:
-- sequential work (use `/goal` loop instead)
+- sequential work (use `/goal` instead)
 - anything you're not sure decomposes cleanly
 - cost matters more than speed on this task
 
@@ -126,16 +128,11 @@ Set me up a dynamic workflow to [task description]
 Save the workflow file to /path/to/project/workflows/
 ```
 
-**vs `/goal`:**
-| `/goal` | Dynamic workflow |
-|---------|-----------------|
-| Depth — loops until done-criteria met | Width — many agents run once in parallel |
-| Single agent, multiple passes | Many agents, each handles one piece |
-| Use for: iterative refinement, retry until passing | Use for: parallel independent subtasks |
-
-**UltraCode warning:** UltraCode mode defaults to dynamic workflows silently. It also uses Extra High effort reasoning and may bypass manual permission checks. Do not enable UltraCode unless you explicitly want workflow-first behavior.
+**vs `/goal`:** `/goal` sets a goal for Claude to work toward; the condition is re-checked every turn by a separate evaluator. Reach for it instead of a dynamic workflow when the work is sequential rather than a set of independent parallel pieces.
 
 **Cost reality:** Dynamic workflows are the most expensive pattern. One poorly-scoped workflow session can consume half a monthly API budget. Confirm with user before initiating.
+
+**Opting in:** including the keyword `ultracode` in a prompt is an explicit opt-in that authorises multi-agent orchestration for that turn — a workflow can then spawn many agents without asking again. Treat it as a spending decision, not a style preference.
 
 ---
 
@@ -156,7 +153,7 @@ Apply these at every level.
 ### Context management
 - `/compact` after any exploration phase — before you start building
 - `/clear` when switching to an unrelated task
-- `/effort low` for mechanical tasks (renaming, formatting, comment removal)
+- Set effort at session START, not mid-task — effort is part of the cache key, so `/effort` mid-session recomputes the whole conversation. For mechanical work, delegate to a subagent with `effort: low` in its frontmatter instead.
 - `/context` to audit what's eating your window if sessions feel heavy
 
 ### Subagents
@@ -165,7 +162,7 @@ Apply these at every level.
 - Parallel cavecrew calls in one message: 2-3 investigator agents on different angles simultaneously
 
 ### Cache
-- Prompt cache TTL: 5 minutes. Work in focused bursts — don't let a session go idle then resume
+- Prompt cache TTL is **1 hour on a Claude subscription** (requested automatically); 5 minutes on an API key or cloud provider, or once you're past plan limits on usage credits. Normal breaks are fine — see EFFICIENCY.md
 - Don't restart a session mid-task unless you compact first
 
 ### Session memory
@@ -231,10 +228,10 @@ Every worktree agent must end with a **Shipping Status block** — main thread r
 - Committed: yes | no — <hash or "none">
 - Pushed to GitHub: yes | no
 - Deployed to server: yes | no
-- publish.sh used: yes | no
+- Deploy script used: yes | no
 ```
 
-**Deploy ownership:** agents commit + push only. Main thread runs `./publish.sh` — never the agent. Agents deploying independently bypass the ship-review gate and can cause double-deploys.
+**Deploy ownership:** agents commit + push only. Main thread runs your deploy script — never the agent. Agents deploying independently bypass the ship-review gate and can cause double-deploys.
 
 ### Long-running agent tasks — spec-file pattern
 
@@ -265,7 +262,7 @@ Skip investigator. Hand `path:line` directly to `cavecrew-builder`.
 1. Main thread plans (or `/prompt-engineer` for complex prompts)
 2. `general-purpose` worktree agent builds
 3. `cavecrew-reviewer` reviews diff
-4. `./publish.sh <project> "message"` ships
+4. `<your-publish-script> <project> "message"` ships
 
 
 ---
@@ -278,6 +275,8 @@ Agent Teams allow multiple subagents to work in parallel with shared coordinatio
 { "env": { "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1" } }
 ```
 in `.claude/settings.json`.
+
+Agent teams use roughly 7x the tokens of a standard session **when teammates run in plan mode** (each teammate has its own context window), and are disabled by default.
 
 ### When to use
 
@@ -313,7 +312,6 @@ For applications built with the Anthropic SDK — not for Claude Code sessions.
 **Architecture:**
 - Coordinator (Opus) orchestrates; specialist agents (Sonnet/Haiku) execute
 - Shared filesystem + vault credentials; isolated context per thread
-- Max: 25 concurrent threads, 20 agents in roster
 
 **Model routing:**
 - Planning, architecture, synthesis → Opus
@@ -327,7 +325,7 @@ For applications built with the Anthropic SDK — not for Claude Code sessions.
 
 **MCP scoping:** Each agent declares only the servers it needs. Session-level `vault_ids` supply credentials to all threads automatically. Tool permission events bubble up to the primary thread — handle them there.
 
-**Thread management:** Archive idle threads when done to free against the 25-thread limit. Interrupt before archiving if thread isn't idle.
+**Thread management:** Archive idle threads when done to free capacity against the concurrent-thread limit. Interrupt before archiving if thread isn't idle.
 
 ---
 

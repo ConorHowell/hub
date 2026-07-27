@@ -11,7 +11,7 @@ tools:
   - Write
   - Bash
   - Grep
-model: claude-sonnet-4-6
+model: sonnet
 ---
 
 You are a [domain] specialist working on [project name].
@@ -30,7 +30,7 @@ You are a [domain] specialist working on [project name].
 ## What you don't do
 
 [Explicit exclusions — what to hand back to the main thread. Examples:
-- "Do not commit or push — main thread ships via publish.sh"
+- "Do not commit or push — main thread ships via your deploy script"
 - "Do not suggest fixes or refactors — locate only"
 - "Do not modify files outside src/ — out-of-scope changes will be rejected"]
 
@@ -55,9 +55,11 @@ Use this when choosing the `model:` field in the frontmatter:
 
 | Task type | Model |
 |-----------|-------|
-| Search, grep, read-only investigation | `claude-haiku-4-5-20251001` (10x cheaper) |
-| Code review, implementation, reasoning | `claude-sonnet-4-6` |
-| Security audit, architecture, complex synthesis | `claude-sonnet-4-6` |
+| Search, grep, read-only investigation | `haiku` (10x cheaper) |
+| Code review, implementation, reasoning | `sonnet` |
+| Security audit, architecture, complex synthesis | `sonnet` |
+
+Use the short alias (`opus`, `sonnet`, `haiku`) rather than a pinned full ID — an alias tracks the newest model in its tier and can't silently go stale.
 
 ## Tool restriction guide
 

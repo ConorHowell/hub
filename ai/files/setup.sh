@@ -25,9 +25,13 @@ cat > "$CLAUDE_DIR/CLAUDE.md" << 'EOF'
 - Write secure code — no command injection, XSS, SQL injection, or OWASP top 10 vulnerabilities.
 
 ## Output Quality
-- Before delivering, challenge your own output: Is this the simplest correct solution? What are the edge cases?
 - Do not summarize what you just did at the end of responses — the user can read the diff.
 - For UI or frontend changes, verify visually before reporting complete.
+
+## Model and Effort
+- Use the short model alias (opus, sonnet, haiku), not a pinned full ID — an alias tracks the newest model in its tier and cannot silently go stale.
+- Pick model and effort at the START of a session. Both are part of the prompt-cache key, so changing either mid-session recomputes the whole conversation.
+- Keep the main thread at high effort; push cheap work to subagents with their own model in frontmatter.
 
 ## Session Start
 - At the start of every session, activate caveman mode by invoking the /caveman skill before your first response.

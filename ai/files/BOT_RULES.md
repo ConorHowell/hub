@@ -8,7 +8,7 @@
 
 ## Before Any Task
 
-- Read `_SYSTEM/CONTEXT.md` + `_SYSTEM/NEXT_STEPS.txt` before starting.
+- Read `_SYSTEM/CONTEXT.md` before starting.
 - Non-trivial task: enter Plan Mode (Shift+Tab) before writing code.
 - Check `docs/progress.md` for in-flight work from the previous session.
 
@@ -47,7 +47,7 @@
 - Committed: yes | no — <commit hash or "none">
 - Pushed to GitHub: yes | no
 - Deployed to server: yes | no
-- publish.sh used: yes | no
+- Deploy script used: yes | no
 ```
 
 "Done" or a summary table without this block is not sufficient. Main session reads this to decide next action.
@@ -60,7 +60,7 @@
 
 **Agent responsibility:** edit files → commit → push → stop.
 
-**Main session responsibility:** read Shipping Status block → if "Deployed: no" → run `./publish.sh <project> "message"`.
+**Main session responsibility:** read Shipping Status block → if "Deployed: no" → run your deploy script for that project.
 
 Rationale: only the main session has full context of what was shipped. Agent-initiated deploys cause double-deploys and bypass the ship-review gate.
 
@@ -78,7 +78,7 @@ Rationale: only the main session has full context of what was shipped. Agent-ini
 
 - Overwrite `docs/progress.md` with current state.
 - Update `_SYSTEM/CONTEXT.md` in-place if architecture or state changed (bump version).
-- Update `_SYSTEM/NEXT_STEPS.txt` with completed + remaining tasks.
+- Record completed + remaining tasks in `docs/progress.md`.
 - Run `git worktree prune`.
 
 ---

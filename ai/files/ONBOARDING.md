@@ -22,13 +22,15 @@ Global rules apply to every project. Put session-start behavior, safety rules, a
 
 **3. Install Caveman first** (token savings from session 1)
 ```bash
-npx skills add <path-to-caveman-skill-dir> -a claude-code -y
+mkdir -p "$HOME/.claude/skills"
+ln -sfn "$HOME/.agents/skills/caveman" "$HOME/.claude/skills/caveman"
 ```
-Skills are local directories — you need the source files before installing. Clone a skills repo, or write your own. Skills install globally into `~/.claude/` — run once, active in all projects and sessions.
+Skills are local directories — you need the source files before installing. Clone a skills repo, or write your own. Registering into `~/.claude/skills/` makes the skill global — do it once, active in all projects and sessions. Symlink, never copy — a copied skill drifts from its source and you end up silently running an old version. Point the link at wherever your skill actually lives (`$HOME/.agents/skills/<name>` is what `install-skills.sh` uses; use your project path if you keep skills in a repo). If `~/.claude/skills/<name>` is already a real directory from an older copy-based install, delete it first — `ln -sfn` nests inside it and exits 0, so the stale copy keeps loading and the failure looks like success.
 
 **4. Install remaining skills**
 ```bash
-npx skills add <path-to-skill-dir> -a claude-code -y
+mkdir -p "$HOME/.claude/skills"
+ln -sfn "$HOME/.agents/skills/<name>" "$HOME/.claude/skills/<name>"
 # Repeat for each skill, or use a setup.sh loop
 ```
 
@@ -68,14 +70,15 @@ A `CLAUDE.md` file at your project root tells Claude who it is, how to behave, a
 Skills extend Claude Code with slash commands. They install **globally** — run the install command once from anywhere, and the skill is available in every project and session.
 
 ```bash
-npx skills add <path-to-skill-directory> -a claude-code -y
+mkdir -p "$HOME/.claude/skills"
+ln -sfn "$HOME/.agents/skills/<name>" "$HOME/.claude/skills/<name>"
 ```
 
-`-a claude-code` targets the Claude Code app. `-y` skips confirmation. The skill is written to `~/.claude/` — not to the current project.
+The link lives in `~/.claude/skills/` — global, not scoped to the current project. Symlink, never copy — a copied skill drifts from its source and you end up silently running an old version. Point the link at wherever your skill actually lives (`$HOME/.agents/skills/<name>` is what `install-skills.sh` uses; use your project path if you keep skills in a repo). If `~/.claude/skills/<name>` is already a real directory from an older copy-based install, delete it first — `ln -sfn` nests inside it and exits 0, so the stale copy keeps loading and the failure looks like success.
 
 **Verify a skill installed:** start a session, run the trigger (e.g. `/caveman`). If it responds, it's active. Installed skills also appear listed in the session startup context.
 
-**Common failure:** directory passed to `npx skills add` must contain a `SKILL.md` with valid frontmatter (`name:` and `description:` fields). Missing file or malformed frontmatter = silent failure.
+**Common failure:** the directory you link must contain a `SKILL.md` with valid frontmatter (`name:` and `description:` fields). Missing file or malformed frontmatter = silent failure.
 
 **Start with Caveman** — cuts token usage ~75% and unlocks the full caveman suite.
 
@@ -115,10 +118,12 @@ description: >
 
 **README.md** — short human summary of what it does and how to trigger it.
 
-Register after creating:
+Register after creating (link the path you just created it at):
 ```bash
-npx skills add ./.agents/skills/<name> -a claude-code -y
+mkdir -p "$HOME/.claude/skills"
+ln -sfn "$PWD/.agents/skills/<name>" "$HOME/.claude/skills/<name>"
 ```
+Symlink, never copy — a copied skill drifts from its source and you end up silently running an old version. Point the link at wherever your skill actually lives (`$HOME/.agents/skills/<name>` is what `install-skills.sh` uses; use your project path if you keep skills in a repo). If `~/.claude/skills/<name>` is already a real directory from an older copy-based install, delete it first — `ln -sfn` nests inside it and exits 0, so the stale copy keeps loading and the failure looks like success.
 
 ---
 
@@ -129,10 +134,9 @@ Skills are slash commands — you invoke them manually. Native agents are differ
 | | Skills (`.agents/skills/`) | Native agents (`.claude/agents/`) |
 |---|---|---|
 | Invoked by | Slash command | Claude auto-delegates, or you name them |
-| Runs in | Main context | Isolated context window |
-| Tool restriction | No | Yes — allowlist per agent |
-| Model control | No | Yes — route cheap tasks to Haiku |
-| Context impact | Floods main thread | Output stays isolated |
+| Runs in | Main context by default — a skill can opt into running in a subagent | Isolated context window |
+| Model control | Only by running in a subagent | Yes — route cheap tasks to Haiku |
+| Context impact | Floods main thread unless run in a subagent | Output stays isolated |
 
 ### Format
 
@@ -146,7 +150,7 @@ tools:
   - Read
   - Grep
   - Bash
-model: claude-haiku-4-5-20251001
+model: haiku
 ---
 
 You are a read-only code investigator. Find and report. Never fix, suggest, or refactor.
@@ -162,9 +166,11 @@ Output: path:line — description
 
 | Task type | Model |
 |-----------|-------|
-| Search, grep, read-only | `claude-haiku-4-5-20251001` (10x cheaper) |
-| Code review, implementation | `claude-sonnet-4-6` |
-| Security audit, complex synthesis | `claude-sonnet-4-6` |
+| Search, grep, read-only | `haiku` (10x cheaper) |
+| Code review, implementation | `sonnet` |
+| Security audit, complex synthesis | `sonnet` |
+
+Use the short alias (`opus`, `sonnet`, `haiku`) rather than a pinned full ID — an alias tracks the newest model in its tier and can't silently go stale.
 
 ### Common agent types
 

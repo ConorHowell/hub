@@ -84,12 +84,14 @@ If `EXISTS`: read it, then use `AskUserQuestion` — "Keep your existing global 
 - "Do you have a `.agents/skills/` directory?" — options: Yes, have one already, Starting fresh, Not sure
 - "Which skills do you want to install?" — multiSelect: true — options: Caveman (recommended), Cavecrew, Ship-Review, Prompt Engineer, Persona Builder
 
-**If they have a directory**: list what's in it, install each with:
+**If they have a directory**: list what's in it, register each with:
 ```bash
-npx skills add <path> -a claude-code -y
+mkdir -p "$HOME/.claude/skills"
+ln -sfn "$HOME/.agents/skills/<name>" "$HOME/.claude/skills/<name>"
 ```
+Symlink, never copy — a copied skill drifts from its source and you end up silently running an old version. Point the link at wherever your skill actually lives (`$HOME/.agents/skills/<name>` is what `install-skills.sh` uses; use your project path if you keep skills in a repo). If `~/.claude/skills/<name>` is already a real directory from an older copy-based install, delete it first — `ln -sfn` nests inside it and exits 0, so the stale copy keeps loading and the failure looks like success.
 
-**If starting fresh**: explain they can download skill packages from the hub at chportfolio.us/hub/ai/, or use the `install-skills.sh` script linked there.
+**If starting fresh**: explain they can download skill packages from this AI hub, or use the `install-skills.sh` script published alongside it.
 
 ### Recommended install order
 1. Caveman (token efficiency — install first, use immediately)

@@ -61,4 +61,4 @@
 ## When to Invoke This Bot (not the meta-operator)
 
 - [specific trigger conditions — what work belongs to this project bot]
-- Cross-project or pipeline changes → use Co-Work_Main meta-operator instead
+- Cross-project or pipeline changes → use your cross-project hub's meta-operator instead

@@ -944,7 +944,9 @@
           <summary>Terminal commands</summary>
           <div class="code-block shell">bash install-skills.sh                       # all 4 skills
 bash install-skills.sh cavecrew ship-review  # specific skills</div>
-          <div class="code-block shell">npx skills add &lt;path-to-skill-directory&gt; -a claude-code -y</div>
+          <div class="code-block shell">mkdir -p "$HOME/.claude/skills"
+ln -sfn "$HOME/.agents/skills/&lt;name&gt;" "$HOME/.claude/skills/&lt;name&gt;"</div>
+          <p class="note">Symlink, never copy — a copied skill drifts from its source and you end up silently running an old version. Point the link at wherever your skill actually lives. If <code>~/.claude/skills/&lt;name&gt;</code> is already a real directory from an older copy-based install, delete it first — <code>ln -sfn</code> nests inside it and exits 0, so the stale copy keeps loading and the failure looks like success.</p>
         </details>
         <p class="note" style="margin-top: 10px;">Common failure: skill directory must contain <code>SKILL.md</code> with valid <code>name:</code> and <code>description:</code> frontmatter. Missing file = silent failure.</p>
       </div>
@@ -1064,7 +1066,9 @@ description: &gt;
       <p>Short human summary of what the skill does, how to trigger it, and what the output looks like.</p>
 
       <h3>Register after creating</h3>
-      <div class="code-block shell">npx skills add ./.agents/skills/&lt;name&gt; -a claude-code -y</div>
+      <div class="code-block shell">mkdir -p "$HOME/.claude/skills"
+ln -sfn "$PWD/.agents/skills/&lt;name&gt;" "$HOME/.claude/skills/&lt;name&gt;"</div>
+      <p>Symlink, never copy — a copied skill drifts from its source and you end up silently running an old version.</p>
     </section>
 
     <!-- NATIVE AGENTS -->
@@ -1090,22 +1094,17 @@ description: &gt;
           </tr>
           <tr>
             <td>Runs in</td>
-            <td>Main context window</td>
+            <td>Main context by default — a skill can opt into running in a subagent</td>
             <td>Isolated context window</td>
           </tr>
           <tr>
-            <td>Tool restriction</td>
-            <td>No — all tools available</td>
-            <td>Yes — per-agent allowlist</td>
-          </tr>
-          <tr>
             <td>Model control</td>
-            <td>No</td>
+            <td>Only by running in a subagent</td>
             <td>Yes — route cheap tasks to Haiku</td>
           </tr>
           <tr>
             <td>Context impact</td>
-            <td>Floods main thread</td>
+            <td>Floods main thread unless run in a subagent</td>
             <td>Output stays isolated</td>
           </tr>
         </tbody>
@@ -1123,7 +1122,7 @@ tools:
   - Read
   - Grep
   - Bash
-model: claude-sonnet-4-6
+model: sonnet
 ---
 
 You are an adversarial reviewer. Find problems. No praise.
@@ -1132,10 +1131,11 @@ First line: APPROVE or FLAG</div>
 
       <h3>Model routing guide</h3>
       <ul>
-        <li>Search, grep, read-only investigation → <code>claude-haiku-4-5-20251001</code> (10x cheaper)</li>
-        <li>Code review, implementation, reasoning → <code>claude-sonnet-4-6</code></li>
-        <li>Security audit, complex synthesis → <code>claude-sonnet-4-6</code></li>
+        <li>Search, grep, read-only investigation → <code>haiku</code> (10x cheaper)</li>
+        <li>Code review, implementation, reasoning → <code>sonnet</code></li>
+        <li>Security audit, complex synthesis → <code>sonnet</code></li>
       </ul>
+      <p>Use the short alias (<code>opus</code>, <code>sonnet</code>, <code>haiku</code>) rather than a pinned full ID — an alias tracks the newest model in its tier and can't silently go stale.</p>
 
       <h3>Common agent types</h3>
       <table class="files-table" style="margin-bottom: 28px;">
@@ -1303,7 +1303,7 @@ git diff --cached                 # 6. Final review — then commit</div>
 - Committed: yes | no — &lt;hash or "none"&gt;
 - Pushed to GitHub: yes | no
 - Deployed to server: yes | no
-- publish.sh used: yes | no</div>
+- Deploy script used: yes | no</div>
       <p><strong>Deploy ownership:</strong> agents commit and push only. The main session runs the deploy command — never the agent. Agents deploying independently bypass the review gate and can cause double-deploys.</p>
     </section>
 
@@ -1348,7 +1348,7 @@ VERDICT=$(echo "$REVIEW" | head -1 | tr '[:lower:]' '[:upper:]')
           </tr>
           <tr>
             <td>setup.sh</td>
-            <td>New machine installer — writes ~/.claude config + skill junctions (Git Bash / macOS, requires repo)</td>
+            <td>New machine installer — writes ~/.claude config + skill junctions (Windows only, via Git Bash; requires repo)</td>
             <td><a href="files/setup.sh" download class="btn btn-outline btn-sm">↓</a></td>
           </tr>
           <tr>
@@ -1375,6 +1375,11 @@ VERDICT=$(echo "$REVIEW" | head -1 | tr '[:lower:]' '[:upper:]')
             <td>MULTIAGENT.md</td>
             <td>Multiagent workflow decision guide — complexity ladder, token budget rules, worktree recovery, chaining patterns</td>
             <td><a href="files/MULTIAGENT.md" download class="btn btn-outline btn-sm">↓</a></td>
+          </tr>
+          <tr>
+            <td>EFFICIENCY.md</td>
+            <td>Prompting and token economics — prompting advice that is now obsolete, how prompt caching works and what invalidates it, /rewind vs /compact vs /clear, cutting token use</td>
+            <td><a href="files/EFFICIENCY.md" download class="btn btn-outline btn-sm">↓</a></td>
           </tr>
           <tr>
             <td>CLAUDE.agent-definition.md</td>
