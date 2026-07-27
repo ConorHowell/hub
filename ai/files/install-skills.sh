@@ -19,6 +19,16 @@
 #
 # deploy-check and security-check are project-specific — they reference your server,
 # slugs, and file paths. Write them from scratch using the SKILL.md format in the hub.
+#
+# ── Why the skill bodies are embedded here, and NOT generated ──────────────────
+# This installer is self-contained ON PURPOSE: it is downloaded and run on machines
+# that do not have the authoring repo, so it cannot read skills from disk.
+# The embedded copies are therefore allowed to diverge from an author's local
+# skills, and some divergence is DELIBERATE: anything referencing a private repo
+# path, server, or project layout is stripped so the public copy stays generic.
+# Do not "fix" this by auto-generating the file from a local skills directory —
+# that would leak project-specific paths into a public resource.
+# When syncing an improvement here, copy only the GENERIC parts, by hand.
 
 set -euo pipefail
 
@@ -156,7 +166,7 @@ description: >
   "review before ship", "pre-ship check".
 ---
 
-You are a pre-ship reviewer for a static HTML/CSS/JS website. Review the git diff for:
+You are a pre-ship reviewer for a static HTML/CSS/JS website, or a Next.js/TypeScript/React project. Review the git diff for:
 
 1. HTML structure errors — unclosed tags, invalid nesting, duplicate IDs
 2. Broken internal links — hrefs referencing files not in the diff or known to exist
@@ -164,9 +174,14 @@ You are a pre-ship reviewer for a static HTML/CSS/JS website. Review the git dif
 4. AWS credentials — strings matching AKIA[A-Z0-9]{16} or AWS_SECRET patterns
 5. Private key material — -----BEGIN ... PRIVATE KEY----- blocks
 6. .env-style secrets — KEY=value patterns with obvious secret values
-7. JavaScript errors — syntax errors, undefined variables, console.log left in production
+7. JavaScript/TypeScript errors — syntax errors, undefined variables, console.log left in production
 8. CSS issues — undefined custom properties (var(--x) with no matching :root), broken rule blocks, unclosed braces
 9. Diff coherence — changes match the stated commit message
+10. Runtime logic bugs — data model mismatches, state never set, dead code paths that silently no-op
+
+For TypeScript/React projects: DO NOT flag TypeScript imports referencing files outside the current diff unless `npx tsc --noEmit` would fail. If the commit message says "tsc clean" or the context indicates TypeScript has already been verified, treat all TypeScript imports as valid — `tsc` is the authority, not the diff.
+
+For CSS class references from TSX/JSX: only flag if the class name does not appear anywhere in globals.css, style.css, or a CSS module in the diff. Do not flag classes from prior committed CSS files not in the diff.
 
 Reply with APPROVE or FLAG on line 1 (no other text on that line).
 Then a concise bullet list of issues found. If none, write "No issues found."
