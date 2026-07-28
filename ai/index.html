@@ -1400,26 +1400,34 @@ cd "${CLAUDE_PROJECT_DIR:-$PWD}" 2>/dev/null || exit 0
       <p>This is the part most hook tutorials skip, and it is the part that matters. A hook that is silent when healthy is <strong>indistinguishable from a hook that was never registered</strong>. Piping test JSON into your script proves the script works; it proves nothing about whether Claude Code is running it.</p>
       <div class="table-wrap">
       <table class="files-table">
-        <thead><tr><th>Question</th><th>How to answer it</th></tr></thead>
+        <thead><tr><th>Question</th><th>How to answer it</th><th>Needs the CLI?</th></tr></thead>
         <tbody>
-          <tr><td>Is it registered, and from which settings file?</td><td><code>/hooks</code> — a read-only browser of every event, labelled <code>User</code> / <code>Project</code> / <code>Local</code> / <code>Plugin</code> / <code>Built-in</code></td></tr>
-          <tr><td>Which hooks matched? Exit codes? stdout?</td><td><code>claude --debug-file /tmp/claude.log</code>, then <code>tail -f</code>. Mid-session, run <code>/debug</code></td></tr>
-          <tr><td>What fired this turn?</td><td><code>Ctrl+O</code> transcript view — success is silent, errors show</td></tr>
-          <tr><td>Was my JSON rejected?</td><td>Validation failures go to the <strong>debug log</strong>, not the transcript</td></tr>
-          <tr><td>Configured but never runs</td><td>Check <code>/hooks</code> first. Then: matchers are <strong>case-sensitive</strong>; right event?; <code>chmod +x</code>; absolute path; is <code>jq</code> installed?</td></tr>
-          <tr><td><code>/hooks</code> empty after editing settings</td><td>Restart the session — the file watcher can miss a change. Check for trailing commas</td></tr>
+          <tr><td>Did it run, and which branch did it take?</td><td><code>tail -20 ~/.claude/hooks/.fired.log</code> — the self-instrumentation below</td><td>no</td></tr>
+          <tr><td>Is it registered, and from which settings file?</td><td><code>/hooks</code> — a read-only browser of every event, labelled <code>User</code> / <code>Project</code> / <code>Local</code> / <code>Plugin</code> / <code>Built-in</code></td><td><strong>yes</strong></td></tr>
+          <tr><td>Which hooks matched? Exit codes? stdout?</td><td><code>claude --debug-file /tmp/claude.log</code>, then <code>tail -f</code>. Mid-session, run <code>/debug</code></td><td><strong>yes</strong></td></tr>
+          <tr><td>What fired this turn?</td><td><code>Ctrl+O</code> transcript view — success is silent, errors show</td><td><strong>yes</strong></td></tr>
+          <tr><td>Was my JSON rejected?</td><td>Validation failures go to the <strong>debug log</strong>, not the transcript</td><td><strong>yes</strong></td></tr>
+          <tr><td>Configured but never runs</td><td>Fire log first — silent there means it was never invoked. Then: matchers are <strong>case-sensitive</strong>; right event?; <code>chmod +x</code>; absolute path; is <code>jq</code> installed?</td><td>no</td></tr>
+          <tr><td>Nothing changes after editing settings</td><td>Restart the session — the file watcher can miss a change. Check for trailing commas</td><td>no</td></tr>
         </tbody>
       </table>
       </div>
       <p><strong>Exit 0 with output is not proof of anything.</strong> The docs are explicit: "For most events, stdout is written to the debug log but not shown in the transcript." The exceptions are <code>UserPromptSubmit</code>, <code>UserPromptExpansion</code> and <code>SessionStart</code>, where stdout becomes context Claude can act on. So a hook printing flawless JSON into a void looks exactly like a working one.</p>
       <p class="step-note">This is not in tension with the transcript row above. The transcript shows a one-line <em>summary</em> per hook that fired — and only when it errored, since success is silent. Your hook's actual stdout is a different thing, and for most events it is only ever in the debug log.</p>
-      <p>A cheap trick that needs no debug flag: have each hook append one line to a log file recording which branch it took.</p>
+      <div class="callout warn">
+        <div class="callout-label">Four of those seven rows need a <code>claude</code> binary you may not have</div>
+        <p><code>/hooks</code>, <code>/debug</code>, <code>--debug-file</code> and the transcript view are CLI features, and installing the VS Code extension does not give you the CLI. The docs are explicit — <a href="https://code.claude.com/docs/en/vs-code#run-cli-in-vs-code" target="_blank" rel="noopener">Use Claude Code in VS Code → Run CLI in VS Code</a>: <em>"Installing the extension does not put <code>claude</code> on your shell PATH. The extension bundles a private copy of the CLI for its chat panel, but typing <code>claude</code> in a terminal requires the standalone CLI install."</em> So on an extension-only machine every one of those four fails at the prompt.</p>
+        <p>The extension's <code>/</code> menu does list <strong>hooks</strong> under Customize, which reads like a native viewer. It is not one — it is one of the items the docs describe as opening "in the integrated terminal", so selecting it drops you at a shell prompt and runs <code>claude</code>, which on an extension-only machine does not exist. The menu entry being present is not the same as the feature being available.</p>
+        <p>Run <code>command -v claude</code> before relying on any of them. Your hooks still run exactly the same — the extension reads the same <code>~/.claude/settings.json</code> — you just have no window into them, which makes the log file below the primary tool rather than the fallback.</p>
+      </div>
+      <p>A cheap trick that needs no debug flag, and works identically in the CLI and the extensions: have each hook append one line to a log file recording which branch it took.</p>
       <div class="code-block">log() { printf '%s my-hook %s\n' "$(date -u +%FT%TZ)" "$1" &gt;&gt; ~/.claude/hooks/.fired.log; }
 
 # ...then at each exit path:
 log "quiet(nothing-to-report)"
 log "BLOCKED(reason)"</div>
       <p class="step-note">"Did it fire?" becomes <code>tail</code>. Log only the interesting branches on hooks that fire on every tool call, or the file becomes noise.</p>
+      <p><strong>Firing and delivering are two separate events.</strong> For any hook whose entire job is to return <code>additionalContext</code>, the log proves only half of it. The other half is confirming the injected text actually shows up in the next context — a hook can be invoked correctly, exit 0, and have its output discarded because that event does not accept context injection. Check both, or you have verified the easy half.</p>
 
       <div class="callout warn">
         <div class="callout-label">A <code>Stop</code> hook that returns <code>additionalContext</code> re-opens the turn</div>
