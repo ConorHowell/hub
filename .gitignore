@@ -1,5 +1,12 @@
 .DS_Store
-.claude/
 .htaccess
 .htpasswd
 work/
+
+# Claude method rules: tracked so cloud sessions (which clone from GitHub and see only
+# tracked files) load the same working method as a local session. Canonical copy lives in
+# Co-Work_Main/Study Helper/method/rules/ -- run sync_method.py, never hand-edit.
+.claude/*
+!.claude/rules/
+.claude/rules/*
+!.claude/rules/working-method.md
